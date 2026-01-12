@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Toast from "../components/Toast";
 
 const emptyOrder = {
   quantity: "",
@@ -13,6 +14,7 @@ export default function PlaceOrderClient() {
   const [selected, setSelected] = useState(null);
   const [order, setOrder] = useState(emptyOrder);
   const [status, setStatus] = useState("");
+  const [toast, setToast] = useState({ message: "", visible: false });
 
   async function loadProducts() {
     const response = await fetch("/api/products");
@@ -27,6 +29,13 @@ export default function PlaceOrderClient() {
   useEffect(() => {
     loadProducts();
   }, []);
+
+  function showToast(message) {
+    setToast({ message, visible: true });
+    window.setTimeout(() => {
+      setToast({ message: "", visible: false });
+    }, 2400);
+  }
 
   function openModal(product) {
     setSelected(product);
@@ -61,10 +70,12 @@ export default function PlaceOrderClient() {
     }
     closeModal();
     loadProducts();
+    showToast("Order saved.");
   }
 
   return (
     <div className="space-y-6">
+      <Toast message={toast.message} visible={toast.visible} />
       {status ? (
         <div className="rounded-2xl bg-[color:var(--clay)] px-4 py-3 text-sm text-black/70">
           {status}

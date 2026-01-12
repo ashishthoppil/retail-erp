@@ -1,6 +1,27 @@
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/app/lib/supabase";
 
+export async function GET() {
+  try {
+    const supabase = getSupabaseAdmin();
+    const { data, error } = await supabase
+      .from("orders")
+      .select("id, quantity, selling_price, shipping_charge, created_at, products(name)")
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+
+    return NextResponse.json({ data });
+  } catch (error) {
+    return NextResponse.json(
+      { error: error.message },
+      {
+        status: 500,
+      }
+    );
+  }
+}
+
 export async function POST(request) {
   try {
     const supabase = getSupabaseAdmin();

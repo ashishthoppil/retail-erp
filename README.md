@@ -6,7 +6,8 @@ A responsive stock management tool built for a home decor studio. Track batches,
 
 1. Create a Supabase project.
 2. Run the SQL in `supabase/schema.sql` to create the tables.
-3. Add environment variables in a `.env.local` file:
+3. Create a Storage bucket named `product-images` and mark it as public.
+4. Add environment variables in a `.env.local` file:
 
 ```
 SUPABASE_URL=your-supabase-url
