@@ -32,7 +32,8 @@ export async function POST(request) {
       name: body?.name?.trim(),
       buying_price: Number(body?.buying_price),
       selling_price: Number(body?.selling_price),
-      quantity: Number(body?.quantity),
+      initial_quantity: Number(body?.quantity),
+      current_quantity: Number(body?.quantity),
     };
 
     if (!payload.batch_id || !payload.name) {
@@ -56,9 +57,30 @@ export async function POST(request) {
       );
     }
 
-    if (!Number.isInteger(payload.quantity) || payload.quantity < 0) {
+    if (
+      !Number.isInteger(payload.initial_quantity) ||
+      payload.initial_quantity < 0
+    ) {
       return NextResponse.json(
         { error: "Quantity must be a whole number." },
+        { status: 400 }
+      );
+    }
+
+    const { data: capital, error: capitalError } = await supabase
+      .from("capital")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .single();
+
+    if (capitalError && capitalError.code !== "PGRST116") {
+      throw capitalError;
+    }
+
+    if (!capital) {
+      return NextResponse.json(
+        { error: "Set initial capital before adding stock." },
         { status: 400 }
       );
     }
@@ -70,6 +92,15 @@ export async function POST(request) {
       .single();
 
     if (error) throw error;
+
+    const stockCost = payload.buying_price * payload.initial_quantity;
+    const newAmount = Number(capital.amount) - stockCost;
+    const { error: capitalUpdateError } = await supabase
+      .from("capital")
+      .update({ amount: newAmount })
+      .eq("id", capital.id);
+
+    if (capitalUpdateError) throw capitalUpdateError;
 
     return NextResponse.json({ data });
   } catch (error) {
@@ -101,7 +132,7 @@ export async function PATCH(request) {
       name: body?.name?.trim(),
       buying_price: Number(body?.buying_price),
       selling_price: Number(body?.selling_price),
-      quantity: Number(body?.quantity),
+      current_quantity: Number(body?.current_quantity),
     };
 
     if (!payload.name) {
@@ -125,7 +156,10 @@ export async function PATCH(request) {
       );
     }
 
-    if (!Number.isInteger(payload.quantity) || payload.quantity < 0) {
+    if (
+      !Number.isInteger(payload.current_quantity) ||
+      payload.current_quantity < 0
+    ) {
       return NextResponse.json(
         { error: "Quantity must be a whole number." },
         { status: 400 }

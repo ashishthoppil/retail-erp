@@ -1,9 +1,11 @@
 import Link from "next/link";
 
 const navLinks = [
+  { href: "/", label: "Home" },
   { href: "/add-stock", label: "Add Stock" },
   { href: "/place-order", label: "Place Order" },
   { href: "/reports", label: "View Reports" },
+  { href: "/expenses", label: "Add Expenses" },
 ];
 
 export default function AppShell({ title, subtitle, children }) {

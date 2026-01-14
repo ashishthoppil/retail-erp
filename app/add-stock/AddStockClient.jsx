@@ -183,7 +183,7 @@ export default function AddStockClient() {
       name: item.name || "",
       buying_price: item.buying_price ?? "",
       selling_price: item.selling_price ?? "",
-      quantity: item.quantity ?? "",
+      current_quantity: item.current_quantity ?? "",
     });
     setEditingProductFile(null);
   }
@@ -252,10 +252,10 @@ export default function AddStockClient() {
   return (
     <div className="space-y-10">
       <Toast message={toast.message} visible={toast.visible} />
-      <section className="grid gap-8 lg:grid-cols-[1fr_1.2fr]">
+      <section className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
         <form
           onSubmit={handleBatchSubmit}
-          className="rounded-[28px] border border-black/10 bg-white/80 p-6 shadow-sm"
+          className="min-w-0 rounded-[28px] border border-black/10 bg-white/80 p-6 shadow-sm"
         >
           <h2 className="font-serif text-2xl text-[color:var(--ink)]">
             Create a batch
@@ -271,7 +271,7 @@ export default function AddStockClient() {
               value={batchName}
               onChange={(event) => setBatchName(event.target.value)}
               placeholder="Spring showroom drop"
-              className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm focus:border-[color:var(--sage)] focus:outline-none"
+              className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm focus:border-[color:var(--sage)] focus:outline-none"
               required
             />
           </div>
@@ -282,11 +282,11 @@ export default function AddStockClient() {
             Save Batch
           </button>
           <div className="mt-6 overflow-x-auto rounded-2xl border border-black/10 bg-white">
-            <table className="w-full min-w-[320px] text-left text-xs">
+            <table className="w-full table-fixed text-left text-xs">
               <thead className="bg-black/5 uppercase tracking-[0.2em] text-black/45">
                 <tr>
                   <th className="px-4 py-3">Batch</th>
-                  <th className="px-4 py-3 text-right">Actions</th>
+                  <th className="w-24 px-4 py-3 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-black/5">
@@ -363,7 +363,7 @@ export default function AddStockClient() {
 
         <form
           onSubmit={handleProductSubmit}
-          className="rounded-[28px] border border-black/10 bg-white/80 p-6 shadow-sm"
+          className="min-w-0 rounded-[28px] border border-black/10 bg-white/80 p-6 shadow-sm"
         >
           <h2 className="font-serif text-2xl text-[color:var(--ink)]">
             Add product details
@@ -384,7 +384,7 @@ export default function AddStockClient() {
                     batch_id: event.target.value,
                   }))
                 }
-                className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm focus:border-[color:var(--sage)] focus:outline-none"
+                className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm focus:border-[color:var(--sage)] focus:outline-none"
                 required
               >
                 <option value="">Select batch</option>
@@ -402,8 +402,10 @@ export default function AddStockClient() {
               <input
                 type="file"
                 accept="image/*"
-                onChange={(event) => setProductFile(event.target.files?.[0] || null)}
-                className="rounded-2xl border border-dashed border-black/20 bg-white px-4 py-3 text-sm focus:border-[color:var(--sage)] focus:outline-none"
+                onChange={(event) =>
+                  setProductFile(event.target.files?.[0] || null)
+                }
+                className="w-full rounded-2xl border border-dashed border-black/20 bg-white px-4 py-3 text-sm focus:border-[color:var(--sage)] focus:outline-none"
               />
             </div>
             <div className="flex flex-col gap-2">
@@ -416,7 +418,7 @@ export default function AddStockClient() {
                   setProduct((prev) => ({ ...prev, name: event.target.value }))
                 }
                 placeholder="Rustic clay vase"
-                className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm focus:border-[color:var(--sage)] focus:outline-none"
+                className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm focus:border-[color:var(--sage)] focus:outline-none"
                 required
               />
             </div>
@@ -435,7 +437,7 @@ export default function AddStockClient() {
                 type="number"
                 min="0"
                 step="0.01"
-                className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm focus:border-[color:var(--sage)] focus:outline-none"
+                className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm focus:border-[color:var(--sage)] focus:outline-none"
                 required
               />
             </div>
@@ -454,7 +456,7 @@ export default function AddStockClient() {
                 type="number"
                 min="0"
                 step="0.01"
-                className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm focus:border-[color:var(--sage)] focus:outline-none"
+                className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm focus:border-[color:var(--sage)] focus:outline-none"
                 required
               />
             </div>
@@ -473,7 +475,7 @@ export default function AddStockClient() {
                 type="number"
                 min="0"
                 step="1"
-                className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm focus:border-[color:var(--sage)] focus:outline-none"
+                className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm focus:border-[color:var(--sage)] focus:outline-none"
                 required
               />
             </div>
@@ -639,17 +641,17 @@ export default function AddStockClient() {
                           type="number"
                           min="0"
                           step="1"
-                          value={editingProduct?.quantity ?? ""}
+                          value={editingProduct?.current_quantity ?? ""}
                           onChange={(event) =>
                             setEditingProduct((prev) => ({
                               ...prev,
-                              quantity: event.target.value,
+                              current_quantity: event.target.value,
                             }))
                           }
                           className="w-20 rounded-xl border border-black/10 px-3 py-2 text-xs focus:border-[color:var(--sage)] focus:outline-none"
                         />
                       ) : (
-                        item.quantity
+                        item.current_quantity
                       )}
                     </td>
                     <td className="text-right">

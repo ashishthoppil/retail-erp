@@ -126,7 +126,7 @@ export default function PlaceOrderClient() {
                   </td>
                   <td>{item.batches?.name || "—"}</td>
                   <td>{item.selling_price}</td>
-                  <td>{item.quantity}</td>
+                  <td>{item.current_quantity}</td>
                   <td className="text-right">
                     <button
                       type="button"
@@ -165,7 +165,7 @@ export default function PlaceOrderClient() {
                   {selected.name}
                 </h3>
                 <p className="mt-1 text-sm text-black/60">
-                  Available: {selected.quantity}
+                  Available: {selected.current_quantity}
                 </p>
               </div>
               <button

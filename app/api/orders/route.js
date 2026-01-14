@@ -61,7 +61,7 @@ export async function POST(request) {
 
     const { data: product, error: productError } = await supabase
       .from("products")
-      .select("id, quantity")
+      .select("id, current_quantity")
       .eq("id", productId)
       .single();
 
@@ -74,7 +74,7 @@ export async function POST(request) {
       );
     }
 
-    const remaining = product.quantity - quantity;
+    const remaining = product.current_quantity - quantity;
     if (remaining < 0) {
       return NextResponse.json(
         { error: "Not enough stock available." },
@@ -97,10 +97,37 @@ export async function POST(request) {
 
     const { error: updateError } = await supabase
       .from("products")
-      .update({ quantity: remaining })
+      .update({ current_quantity: remaining })
       .eq("id", productId);
 
     if (updateError) throw updateError;
+
+    const { data: capital, error: capitalError } = await supabase
+      .from("capital")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .single();
+
+    if (capitalError && capitalError.code !== "PGRST116") {
+      throw capitalError;
+    }
+
+    if (!capital) {
+      return NextResponse.json(
+        { error: "Set initial capital before placing orders." },
+        { status: 400 }
+      );
+    }
+
+    const revenue = quantity * sellingPrice + shippingCharge;
+    const newAmount = Number(capital.amount) + revenue;
+    const { error: capitalUpdateError } = await supabase
+      .from("capital")
+      .update({ amount: newAmount })
+      .eq("id", capital.id);
+
+    if (capitalUpdateError) throw capitalUpdateError;
 
     return NextResponse.json({ data: order });
   } catch (error) {

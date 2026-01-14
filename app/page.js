@@ -1,5 +1,7 @@
 import Link from "next/link";
 import AppShell from "./components/AppShell";
+import CapitalCard from "./components/CapitalCard";
+import StockReminder from "./components/StockReminder";
 
 export default function Home() {
   return (
@@ -7,7 +9,10 @@ export default function Home() {
       title="Inventory at a glance."
       subtitle="Track batches, add new decor items, and place orders for your home studio without the fuss."
     >
-      <section className="grid gap-4 md:grid-cols-3">
+      <section className="space-y-6">
+        <CapitalCard />
+        <StockReminder />
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {[
             {
               title: "Add Stock",
@@ -24,6 +29,11 @@ export default function Home() {
               title: "View Reports",
               description: "Weekly, monthly, and yearly revenue at a glance.",
               href: "/reports",
+            },
+            {
+              title: "Add Expenses",
+              description: "Log outgoing costs and adjust capital.",
+              href: "/expenses",
             },
           ].map((card) => (
             <Link
@@ -42,6 +52,7 @@ export default function Home() {
               </span>
             </Link>
           ))}
+        </div>
       </section>
     </AppShell>
   );

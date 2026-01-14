@@ -13,7 +13,8 @@ create table if not exists public.products (
   name text not null,
   buying_price numeric(12, 2) not null,
   selling_price numeric(12, 2) not null,
-  quantity integer not null default 0,
+  initial_quantity integer not null default 0,
+  current_quantity integer not null default 0,
   created_at timestamptz not null default now()
 );
 
@@ -26,6 +27,21 @@ create table if not exists public.orders (
   created_at timestamptz not null default now()
 );
 
+create table if not exists public.capital (
+  id uuid primary key default gen_random_uuid(),
+  amount numeric(12, 2) not null,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists public.expenses (
+  id uuid primary key default gen_random_uuid(),
+  expense_type text not null,
+  amount numeric(12, 2) not null,
+  created_at timestamptz not null default now()
+);
+
 alter table public.batches disable row level security;
 alter table public.products disable row level security;
 alter table public.orders disable row level security;
+alter table public.capital disable row level security;
+alter table public.expenses disable row level security;
