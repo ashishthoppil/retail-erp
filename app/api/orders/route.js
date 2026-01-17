@@ -6,7 +6,9 @@ export async function GET() {
     const supabase = getSupabaseAdmin();
     const { data, error } = await supabase
       .from("orders")
-      .select("id, quantity, selling_price, shipping_charge, created_at, products(name)")
+      .select(
+        "id, quantity, selling_price, shipping_charge, created_at, products(name, buying_price)"
+      )
       .order("created_at", { ascending: false });
 
     if (error) throw error;

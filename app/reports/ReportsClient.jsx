@@ -45,6 +45,22 @@ export default function ReportsClient() {
       maximumFractionDigits: 2,
     }).format(value || 0);
 
+  const totals = orders.reduce(
+    (acc, order) => {
+      const quantity = Number(order.quantity || 0);
+      const sellingPrice = Number(order.selling_price || 0);
+      const shippingCharge = Number(order.shipping_charge || 0);
+      const buyingPrice = Number(order.products?.buying_price || 0);
+
+      acc.revenue += quantity * sellingPrice + shippingCharge;
+      acc.wholesale += quantity * buyingPrice;
+      return acc;
+    },
+    { revenue: 0, wholesale: 0 }
+  );
+
+  const profit = totals.revenue - totals.wholesale;
+
   return (
     <div className="space-y-6">
       {status ? (
@@ -68,6 +84,33 @@ export default function ReportsClient() {
             label: "Yearly revenue",
             value: report.yearly,
             note: "Since Jan 1",
+          },
+        ].map((item) => (
+          <div
+            key={item.label}
+            className="rounded-[28px] border border-black/10 bg-white/85 p-6 shadow-sm"
+          >
+            <p className="text-xs uppercase tracking-[0.2em] text-black/50">
+              {item.label}
+            </p>
+            <h2 className="mt-4 font-serif text-3xl text-[color:var(--ink)]">
+              {formatCurrency(item.value)}
+            </h2>
+            <p className="mt-2 text-sm text-black/55">{item.note}</p>
+          </div>
+        ))}
+      </div>
+      <div className="grid gap-6 md:grid-cols-2">
+        {[
+          {
+            label: "Total wholesale sold",
+            value: totals.wholesale,
+            note: "All time",
+          },
+          {
+            label: "Profit from sales",
+            value: profit,
+            note: "All time",
           },
         ].map((item) => (
           <div
@@ -112,7 +155,7 @@ export default function ReportsClient() {
                     <td className="py-3">
                       {new Date(order.created_at).toLocaleDateString("en-IN")}
                     </td>
-                    <td>{order.products?.name || "—"}</td>
+                    <td>{order.products?.name || "Unknown"}</td>
                     <td>{order.quantity}</td>
                     <td>{formatCurrency(total)}</td>
                   </tr>
