@@ -12,6 +12,8 @@ const emptyProduct = {
   quantity: "",
 };
 
+const PAGE_SIZE = 10;
+
 export default function AddStockClient() {
   const [batchName, setBatchName] = useState("");
   const [product, setProduct] = useState(emptyProduct);
@@ -25,6 +27,10 @@ export default function AddStockClient() {
   const [editingProduct, setEditingProduct] = useState(null);
   const [editingProductFile, setEditingProductFile] = useState(null);
   const [status, setStatus] = useState("");
+  const [batchQuery, setBatchQuery] = useState("");
+  const [batchPage, setBatchPage] = useState(1);
+  const [productQuery, setProductQuery] = useState("");
+  const [productPage, setProductPage] = useState(1);
 
   const imagePreview = useMemo(() => {
     if (productFile) {
@@ -73,6 +79,14 @@ export default function AddStockClient() {
   useEffect(() => {
     loadData();
   }, []);
+
+  useEffect(() => {
+    setBatchPage(1);
+  }, [batchQuery]);
+
+  useEffect(() => {
+    setProductPage(1);
+  }, [productQuery]);
 
   async function handleBatchSubmit(event) {
     event.preventDefault();
@@ -249,6 +263,43 @@ export default function AddStockClient() {
     showToast("Product deleted.");
   }
 
+  const filteredBatches = useMemo(() => {
+    const query = batchQuery.trim().toLowerCase();
+    if (!query) return batches;
+    return batches.filter((batch) => batch.name?.toLowerCase().includes(query));
+  }, [batches, batchQuery]);
+
+  const batchPages = Math.max(1, Math.ceil(filteredBatches.length / PAGE_SIZE));
+
+  useEffect(() => {
+    setBatchPage((prev) => Math.min(prev, batchPages));
+  }, [batchPages]);
+
+  const pagedBatches = filteredBatches.slice(
+    (batchPage - 1) * PAGE_SIZE,
+    batchPage * PAGE_SIZE
+  );
+
+  const filteredProducts = useMemo(() => {
+    const query = productQuery.trim().toLowerCase();
+    if (!query) return products;
+    return products.filter((item) => item.name?.toLowerCase().includes(query));
+  }, [products, productQuery]);
+
+  const productPages = Math.max(
+    1,
+    Math.ceil(filteredProducts.length / PAGE_SIZE)
+  );
+
+  useEffect(() => {
+    setProductPage((prev) => Math.min(prev, productPages));
+  }, [productPages]);
+
+  const pagedProducts = filteredProducts.slice(
+    (productPage - 1) * PAGE_SIZE,
+    productPage * PAGE_SIZE
+  );
+
   return (
     <div className="space-y-10">
       <Toast message={toast.message} visible={toast.visible} />
@@ -281,7 +332,13 @@ export default function AddStockClient() {
           >
             Save Batch
           </button>
-          <div className="mt-6 overflow-x-auto rounded-2xl border border-black/10 bg-white">
+          <input
+            value={batchQuery}
+            onChange={(event) => setBatchQuery(event.target.value)}
+            placeholder="Search by item name"
+            className="mt-6 w-full rounded-full border border-black/10 bg-white px-4 py-2 text-sm text-black/70 focus:border-[color:var(--sage)] focus:outline-none"
+          />
+          <div className="mt-4 overflow-x-auto rounded-2xl border border-black/10 bg-white">
             <table className="w-full table-fixed text-left text-xs">
               <thead className="bg-black/5 uppercase tracking-[0.2em] text-black/45">
                 <tr>
@@ -290,7 +347,7 @@ export default function AddStockClient() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-black/5">
-                {batches.slice(0, 6).map((batch) => (
+                {pagedBatches.map((batch) => (
                   <tr key={batch.id} className="text-black/70">
                     <td className="px-4 py-3">
                       {editingBatchId === batch.id ? (
@@ -346,7 +403,7 @@ export default function AddStockClient() {
                     </td>
                   </tr>
                 ))}
-                {!batches.length ? (
+                {!filteredBatches.length ? (
                   <tr>
                     <td
                       colSpan={2}
@@ -358,6 +415,31 @@ export default function AddStockClient() {
                 ) : null}
               </tbody>
             </table>
+          </div>
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-xs text-black/60">
+            <span>
+              Page {batchPage} of {batchPages}
+            </span>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setBatchPage((prev) => Math.max(1, prev - 1))}
+                disabled={batchPage === 1}
+                className="rounded-full border border-black/10 bg-white px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-black/70 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Prev
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  setBatchPage((prev) => Math.min(batchPages, prev + 1))
+                }
+                disabled={batchPage === batchPages}
+                className="rounded-full border border-black/10 bg-white px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-black/70 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Next
+              </button>
+            </div>
           </div>
         </form>
 
@@ -508,11 +590,19 @@ export default function AddStockClient() {
               All items captured through the form above.
             </p>
           </div>
-          {status ? (
-            <span className="rounded-full bg-[color:var(--clay)] px-4 py-1 text-xs text-black/70">
-              {status}
-            </span>
-          ) : null}
+          <div className="flex w-full flex-wrap items-center gap-3 sm:w-auto">
+            <input
+              value={productQuery}
+              onChange={(event) => setProductQuery(event.target.value)}
+              placeholder="Search by item name"
+              className="w-full rounded-full border border-black/10 bg-white px-4 py-2 text-sm text-black/70 focus:border-[color:var(--sage)] focus:outline-none sm:w-64"
+            />
+            {status ? (
+              <span className="rounded-full bg-[color:var(--clay)] px-4 py-1 text-xs text-black/70">
+                {status}
+              </span>
+            ) : null}
+          </div>
         </div>
         <div className="mt-6 overflow-x-auto">
           <table className="w-full min-w-[720px] text-left text-sm">
@@ -527,7 +617,7 @@ export default function AddStockClient() {
               </tr>
             </thead>
             <tbody className="divide-y divide-black/5">
-              {products.map((item) => {
+              {pagedProducts.map((item) => {
                 const isEditing = editingProductId === item.id;
                 return (
                   <tr key={item.id} className="text-black/70">
@@ -694,7 +784,7 @@ export default function AddStockClient() {
                   </tr>
                 );
               })}
-              {!products.length ? (
+              {!filteredProducts.length ? (
                 <tr>
                   <td
                     colSpan={6}
@@ -706,6 +796,31 @@ export default function AddStockClient() {
               ) : null}
             </tbody>
           </table>
+        </div>
+        <div className="mt-5 flex flex-wrap items-center justify-between gap-3 text-sm text-black/60">
+          <span>
+            Page {productPage} of {productPages}
+          </span>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setProductPage((prev) => Math.max(1, prev - 1))}
+              disabled={productPage === 1}
+              className="rounded-full border border-black/10 bg-white px-3 py-1 text-xs uppercase tracking-[0.2em] text-black/70 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Prev
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                setProductPage((prev) => Math.min(productPages, prev + 1))
+              }
+              disabled={productPage === productPages}
+              className="rounded-full border border-black/10 bg-white px-3 py-1 text-xs uppercase tracking-[0.2em] text-black/70 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
         </div>
       </section>
     </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Toast from "../components/Toast";
 
 const emptyOrder = {
@@ -9,12 +9,16 @@ const emptyOrder = {
   shipping_charge: "",
 };
 
+const PAGE_SIZE = 10;
+
 export default function PlaceOrderClient() {
   const [products, setProducts] = useState([]);
   const [selected, setSelected] = useState(null);
   const [order, setOrder] = useState(emptyOrder);
   const [status, setStatus] = useState("");
   const [toast, setToast] = useState({ message: "", visible: false });
+  const [productQuery, setProductQuery] = useState("");
+  const [productPage, setProductPage] = useState(1);
 
   async function loadProducts() {
     const response = await fetch("/api/products");
@@ -29,6 +33,10 @@ export default function PlaceOrderClient() {
   useEffect(() => {
     loadProducts();
   }, []);
+
+  useEffect(() => {
+    setProductPage(1);
+  }, [productQuery]);
 
   function showToast(message) {
     setToast({ message, visible: true });
@@ -73,6 +81,23 @@ export default function PlaceOrderClient() {
     showToast("Order saved.");
   }
 
+  const filteredProducts = useMemo(() => {
+    const query = productQuery.trim().toLowerCase();
+    if (!query) return products;
+    return products.filter((item) => item.name?.toLowerCase().includes(query));
+  }, [products, productQuery]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / PAGE_SIZE));
+
+  useEffect(() => {
+    setProductPage((prev) => Math.min(prev, totalPages));
+  }, [totalPages]);
+
+  const pagedProducts = filteredProducts.slice(
+    (productPage - 1) * PAGE_SIZE,
+    productPage * PAGE_SIZE
+  );
+
   return (
     <div className="space-y-6">
       <Toast message={toast.message} visible={toast.visible} />
@@ -82,7 +107,7 @@ export default function PlaceOrderClient() {
         </div>
       ) : null}
       <section className="rounded-[28px] border border-black/10 bg-white/80 p-6 shadow-sm">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 className="font-serif text-2xl text-[color:var(--ink)]">
               Ready-to-sell products
@@ -91,6 +116,12 @@ export default function PlaceOrderClient() {
               Click any item to record a sale.
             </p>
           </div>
+          <input
+            value={productQuery}
+            onChange={(event) => setProductQuery(event.target.value)}
+            placeholder="Search by item name"
+            className="w-full rounded-full border border-black/10 bg-white px-4 py-2 text-sm text-black/70 focus:border-[color:var(--sage)] focus:outline-none sm:w-64"
+          />
         </div>
         <div className="mt-6 overflow-x-auto">
           <table className="w-full min-w-[720px] text-left text-sm">
@@ -104,7 +135,7 @@ export default function PlaceOrderClient() {
               </tr>
             </thead>
             <tbody className="divide-y divide-black/5">
-              {products.map((item) => (
+              {pagedProducts.map((item) => (
                 <tr key={item.id} className="text-black/70">
                   <td className="py-3">
                     <div className="flex items-center gap-3">
@@ -138,7 +169,7 @@ export default function PlaceOrderClient() {
                   </td>
                 </tr>
               ))}
-              {!products.length ? (
+              {!filteredProducts.length ? (
                 <tr>
                   <td
                     colSpan={5}
@@ -150,6 +181,31 @@ export default function PlaceOrderClient() {
               ) : null}
             </tbody>
           </table>
+        </div>
+        <div className="mt-5 flex flex-wrap items-center justify-between gap-3 text-sm text-black/60">
+          <span>
+            Page {productPage} of {totalPages}
+          </span>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setProductPage((prev) => Math.max(1, prev - 1))}
+              disabled={productPage === 1}
+              className="rounded-full border border-black/10 bg-white px-3 py-1 text-xs uppercase tracking-[0.2em] text-black/70 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Prev
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                setProductPage((prev) => Math.min(totalPages, prev + 1))
+              }
+              disabled={productPage === totalPages}
+              className="rounded-full border border-black/10 bg-white px-3 py-1 text-xs uppercase tracking-[0.2em] text-black/70 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
         </div>
       </section>
 

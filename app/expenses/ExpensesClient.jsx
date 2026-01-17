@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Toast from "../components/Toast";
 
 const emptyExpense = {
   expense_type: "",
   amount: "",
 };
+
+const PAGE_SIZE = 10;
 
 export default function ExpensesClient() {
   const [form, setForm] = useState(emptyExpense);
@@ -15,10 +17,16 @@ export default function ExpensesClient() {
   const [editingExpense, setEditingExpense] = useState(null);
   const [status, setStatus] = useState("");
   const [toast, setToast] = useState({ message: "", visible: false });
+  const [expenseQuery, setExpenseQuery] = useState("");
+  const [expensePage, setExpensePage] = useState(1);
 
   useEffect(() => {
     loadExpenses();
   }, []);
+
+  useEffect(() => {
+    setExpensePage(1);
+  }, [expenseQuery]);
 
   function showToast(message) {
     setToast({ message, visible: true });
@@ -106,6 +114,25 @@ export default function ExpensesClient() {
     showToast("Expense deleted.");
   }
 
+  const filteredExpenses = useMemo(() => {
+    const query = expenseQuery.trim().toLowerCase();
+    if (!query) return expenses;
+    return expenses.filter((expense) =>
+      expense.expense_type?.toLowerCase().includes(query)
+    );
+  }, [expenses, expenseQuery]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredExpenses.length / PAGE_SIZE));
+
+  useEffect(() => {
+    setExpensePage((prev) => Math.min(prev, totalPages));
+  }, [totalPages]);
+
+  const pagedExpenses = filteredExpenses.slice(
+    (expensePage - 1) * PAGE_SIZE,
+    expensePage * PAGE_SIZE
+  );
+
   return (
     <div className="space-y-10">
       <Toast message={toast.message} visible={toast.visible} />
@@ -163,13 +190,16 @@ export default function ExpensesClient() {
       </section>
 
       <section className="rounded-[28px] border border-black/10 bg-white/80 p-6 shadow-sm">
-        <div>
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="font-serif text-2xl text-[color:var(--ink)]">
             Expense log
           </h2>
-          <p className="mt-1 text-sm text-black/60">
-            Edit or delete entries to keep capital accurate.
-          </p>
+          <input
+            value={expenseQuery}
+            onChange={(event) => setExpenseQuery(event.target.value)}
+            placeholder="Search by item name"
+            className="w-full rounded-full border border-black/10 bg-white px-4 py-2 text-sm text-black/70 focus:border-[color:var(--sage)] focus:outline-none sm:w-64"
+          />
         </div>
         <div className="mt-6 overflow-x-auto">
           <table className="w-full min-w-[640px] text-left text-sm">
@@ -182,7 +212,7 @@ export default function ExpensesClient() {
               </tr>
             </thead>
             <tbody className="divide-y divide-black/5">
-              {expenses.map((expense) => {
+              {pagedExpenses.map((expense) => {
                 const isEditing = editingId === expense.id;
                 return (
                   <tr key={expense.id} className="text-black/70">
@@ -266,7 +296,7 @@ export default function ExpensesClient() {
                   </tr>
                 );
               })}
-              {!expenses.length ? (
+              {!filteredExpenses.length ? (
                 <tr>
                   <td
                     colSpan={4}
@@ -278,6 +308,31 @@ export default function ExpensesClient() {
               ) : null}
             </tbody>
           </table>
+        </div>
+        <div className="mt-5 flex flex-wrap items-center justify-between gap-3 text-sm text-black/60">
+          <span>
+            Page {expensePage} of {totalPages}
+          </span>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setExpensePage((prev) => Math.max(1, prev - 1))}
+              disabled={expensePage === 1}
+              className="rounded-full border border-black/10 bg-white px-3 py-1 text-xs uppercase tracking-[0.2em] text-black/70 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Prev
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                setExpensePage((prev) => Math.min(totalPages, prev + 1))
+              }
+              disabled={expensePage === totalPages}
+              className="rounded-full border border-black/10 bg-white px-3 py-1 text-xs uppercase tracking-[0.2em] text-black/70 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
         </div>
       </section>
     </div>
