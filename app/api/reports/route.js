@@ -13,7 +13,7 @@ function totalRevenue(rows) {
 
 export async function GET() {
   try {
-    const supabase = getSupabaseServer();
+    const supabase = await getSupabaseServer();
     const {
       data: { user },
     } = await supabase.auth.getUser();

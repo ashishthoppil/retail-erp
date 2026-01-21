@@ -19,7 +19,7 @@ export async function POST(request) {
       );
     }
 
-    const supabase = getSupabaseServer();
+    const supabase = await getSupabaseServer();
     const {
       data: { user },
     } = await supabase.auth.getUser();

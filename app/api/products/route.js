@@ -3,7 +3,7 @@ import { getSupabaseServer } from "@/app/lib/supabase-server";
 
 export async function GET() {
   try {
-    const supabase = getSupabaseServer();
+    const supabase = await getSupabaseServer();
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -31,7 +31,7 @@ export async function GET() {
 
 export async function POST(request) {
   try {
-    const supabase = getSupabaseServer();
+    const supabase = await getSupabaseServer();
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -130,7 +130,7 @@ export async function POST(request) {
 
 export async function PATCH(request) {
   try {
-    const supabase = getSupabaseServer();
+    const supabase = await getSupabaseServer();
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -210,7 +210,7 @@ export async function PATCH(request) {
 
 export async function DELETE(request) {
   try {
-    const supabase = getSupabaseServer();
+    const supabase = await getSupabaseServer();
     const {
       data: { user },
     } = await supabase.auth.getUser();
