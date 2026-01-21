@@ -1,12 +1,19 @@
 import { NextResponse } from "next/server";
-import { getSupabaseAdmin } from "@/app/lib/supabase";
+import { getSupabaseServer } from "@/app/lib/supabase-server";
 
 export async function GET() {
   try {
-    const supabase = getSupabaseAdmin();
+    const supabase = getSupabaseServer();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+    }
     const { data, error } = await supabase
       .from("products")
       .select("*, batches(name)")
+      .eq("user_id", user.id)
       .order("created_at", { ascending: false });
 
     if (error) throw error;
@@ -24,7 +31,13 @@ export async function GET() {
 
 export async function POST(request) {
   try {
-    const supabase = getSupabaseAdmin();
+    const supabase = getSupabaseServer();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+    }
     const body = await request.json();
     const payload = {
       batch_id: body?.batch_id,
@@ -34,6 +47,7 @@ export async function POST(request) {
       selling_price: Number(body?.selling_price),
       initial_quantity: Number(body?.quantity),
       current_quantity: Number(body?.quantity),
+      user_id: user.id,
     };
 
     if (!payload.batch_id || !payload.name) {
@@ -70,6 +84,7 @@ export async function POST(request) {
     const { data: capital, error: capitalError } = await supabase
       .from("capital")
       .select("*")
+      .eq("user_id", user.id)
       .order("created_at", { ascending: false })
       .limit(1)
       .single();
@@ -115,7 +130,13 @@ export async function POST(request) {
 
 export async function PATCH(request) {
   try {
-    const supabase = getSupabaseAdmin();
+    const supabase = getSupabaseServer();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+    }
     const body = await request.json();
     const id = body?.id;
 
@@ -170,6 +191,7 @@ export async function PATCH(request) {
       .from("products")
       .update(payload)
       .eq("id", id)
+      .eq("user_id", user.id)
       .select("*, batches(name)")
       .single();
 
@@ -188,7 +210,13 @@ export async function PATCH(request) {
 
 export async function DELETE(request) {
   try {
-    const supabase = getSupabaseAdmin();
+    const supabase = getSupabaseServer();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+    }
     const body = await request.json();
     const id = body?.id;
 
@@ -199,7 +227,11 @@ export async function DELETE(request) {
       );
     }
 
-    const { error } = await supabase.from("products").delete().eq("id", id);
+    const { error } = await supabase
+      .from("products")
+      .delete()
+      .eq("id", id)
+      .eq("user_id", user.id);
 
     if (error) throw error;
 

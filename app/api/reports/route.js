@@ -1,16 +1,25 @@
 import { NextResponse } from "next/server";
-import { getSupabaseAdmin } from "@/app/lib/supabase";
+import { getSupabaseServer } from "@/app/lib/supabase-server";
 
 function totalRevenue(rows) {
   return rows.reduce((sum, row) => {
-    const line = row.quantity * row.selling_price + row.shipping_charge;
-    return sum + line;
+    const itemsTotal = (row.order_items || []).reduce(
+      (itemSum, item) => itemSum + item.quantity * item.selling_price,
+      0
+    );
+    return sum + itemsTotal + (row.shipping_charge || 0);
   }, 0);
 }
 
 export async function GET() {
   try {
-    const supabase = getSupabaseAdmin();
+    const supabase = getSupabaseServer();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+    }
     const now = new Date();
     const weekStart = new Date(now);
     weekStart.setDate(now.getDate() - 7);
@@ -20,15 +29,18 @@ export async function GET() {
     const [weekly, monthly, yearly] = await Promise.all([
       supabase
         .from("orders")
-        .select("quantity, selling_price, shipping_charge, created_at")
+        .select("shipping_charge, created_at, order_items(quantity, selling_price)")
+        .eq("user_id", user.id)
         .gte("created_at", weekStart.toISOString()),
       supabase
         .from("orders")
-        .select("quantity, selling_price, shipping_charge, created_at")
+        .select("shipping_charge, created_at, order_items(quantity, selling_price)")
+        .eq("user_id", user.id)
         .gte("created_at", monthStart.toISOString()),
       supabase
         .from("orders")
-        .select("quantity, selling_price, shipping_charge, created_at")
+        .select("shipping_charge, created_at, order_items(quantity, selling_price)")
+        .eq("user_id", user.id)
         .gte("created_at", yearStart.toISOString()),
     ]);
 

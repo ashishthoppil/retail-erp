@@ -1,12 +1,19 @@
 import { NextResponse } from "next/server";
-import { getSupabaseAdmin } from "@/app/lib/supabase";
+import { getSupabaseServer } from "@/app/lib/supabase-server";
 
 export async function GET() {
   try {
-    const supabase = getSupabaseAdmin();
+    const supabase = getSupabaseServer();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+    }
     const { data, error } = await supabase
       .from("capital")
       .select("*")
+      .eq("user_id", user.id)
       .order("created_at", { ascending: false })
       .limit(1)
       .single();
@@ -28,7 +35,13 @@ export async function GET() {
 
 export async function POST(request) {
   try {
-    const supabase = getSupabaseAdmin();
+    const supabase = getSupabaseServer();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+    }
     const body = await request.json();
     const amount = Number(body?.amount);
 
@@ -42,6 +55,7 @@ export async function POST(request) {
     const { data: existing, error: existingError } = await supabase
       .from("capital")
       .select("*")
+      .eq("user_id", user.id)
       .order("created_at", { ascending: false })
       .limit(1)
       .single();
@@ -53,7 +67,7 @@ export async function POST(request) {
     if (!existing) {
       const { data, error } = await supabase
         .from("capital")
-        .insert({ amount })
+        .insert({ amount, user_id: user.id })
         .select("*")
         .single();
 
@@ -67,6 +81,7 @@ export async function POST(request) {
       .from("capital")
       .update({ amount: newAmount })
       .eq("id", existing.id)
+      .eq("user_id", user.id)
       .select("*")
       .single();
 

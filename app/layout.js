@@ -12,8 +12,8 @@ const manrope = Manrope({
 });
 
 export const metadata = {
-  title: "CasaStock",
-  description: "Personal stock manager for a home decor studio.",
+  title: "Trackza",
+  description: "Personal stock manager for a small businesses.",
 };
 
 export default function RootLayout({ children }) {

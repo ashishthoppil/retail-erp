@@ -2,32 +2,41 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Toast from "../components/Toast";
-
-const emptyOrder = {
-  quantity: "",
-  selling_price: "",
-  shipping_charge: "",
-};
+import { PlusCircleIcon } from "lucide-react";
 
 const PAGE_SIZE = 10;
 
+const emptyLine = {
+  product_id: "",
+  product_name: "",
+  quantity: 1,
+  selling_price: "",
+};
+
 export default function PlaceOrderClient() {
   const [products, setProducts] = useState([]);
-  const [selected, setSelected] = useState(null);
-  const [order, setOrder] = useState(emptyOrder);
   const [status, setStatus] = useState("");
   const [toast, setToast] = useState({ message: "", visible: false });
   const [productQuery, setProductQuery] = useState("");
   const [productPage, setProductPage] = useState(1);
+  const [productsLoading, setProductsLoading] = useState(true);
+  const [isOrderOpen, setIsOrderOpen] = useState(false);
+  const [orderLines, setOrderLines] = useState([emptyLine]);
+  const [address, setAddress] = useState("");
+  const [orderSaving, setOrderSaving] = useState(false);
+  const [lineErrors, setLineErrors] = useState({});
 
   async function loadProducts() {
+    setProductsLoading(true);
     const response = await fetch("/api/products");
     const json = await response.json();
     if (json.error) {
       setStatus(json.error);
+      setProductsLoading(false);
       return;
     }
     setProducts(json.data || []);
+    setProductsLoading(false);
   }
 
   useEffect(() => {
@@ -45,40 +54,109 @@ export default function PlaceOrderClient() {
     }, 2400);
   }
 
-  function openModal(product) {
-    setSelected(product);
-    setOrder({
-      quantity: "",
-      selling_price: product.selling_price ?? "",
-      shipping_charge: "",
-    });
+  function openOrderModal() {
+    setIsOrderOpen(true);
+    setOrderLines([emptyLine]);
+    setAddress("");
+    setLineErrors({});
   }
 
-  function closeModal() {
-    setSelected(null);
-    setOrder(emptyOrder);
+  function closeOrderModal() {
+    setIsOrderOpen(false);
+    setLineErrors({});
   }
 
-  async function handleSubmit(event) {
+  function addLine() {
+    setOrderLines((prev) => [...prev, emptyLine]);
+  }
+
+  function updateLine(index, updates) {
+    setOrderLines((prev) =>
+      prev.map((line, i) => (i === index ? { ...line, ...updates } : line))
+    );
+  }
+
+  function handleProductNameChange(index, value) {
+    const trimmed = value.trim();
+    const match = products.find(
+      (item) => item.name?.toLowerCase() === trimmed.toLowerCase()
+    );
+    if (match) {
+      updateLine(index, {
+        product_id: match.id,
+        product_name: match.name,
+        selling_price: match.selling_price ?? "",
+      });
+      return;
+    }
+    updateLine(index, { product_name: value, product_id: "" });
+  }
+
+  async function handleOrderSubmit(event) {
     event.preventDefault();
-    if (!selected) return;
     setStatus("");
+    setOrderSaving(true);
+    setLineErrors({});
+
+    const errors = {};
+    for (let i = 0; i < orderLines.length; i += 1) {
+      const line = orderLines[i];
+      const product = products.find((item) => item.id === line.product_id);
+      const quantity = Number(line.quantity || 0);
+      if (!product || Number.isNaN(quantity) || quantity <= 0) {
+        errors[i] = "invalid";
+        continue;
+      }
+      if (quantity > Number(product.current_quantity || 0)) {
+        errors[i] = "stock";
+      }
+    }
+
+    if (Object.keys(errors).length) {
+      setLineErrors(errors);
+      alert("Some products are out of stock or invalid. Please adjust.");
+      setOrderSaving(false);
+      return;
+    }
+
     const response = await fetch("/api/orders", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        product_id: selected.id,
-        ...order,
+        address,
+        shipping_charge: 0,
+        items: orderLines.map((line) => ({
+          product_id: line.product_id,
+          quantity: Number(line.quantity),
+          selling_price: Number(line.selling_price),
+        })),
       }),
     });
     const json = await response.json();
     if (!response.ok) {
-      setStatus(json.error || "Unable to place order.");
+      if (json?.out_of_stock?.length) {
+        const errorMap = {};
+        json.out_of_stock.forEach((item) => {
+          const index = orderLines.findIndex(
+            (line) => line.product_id === item.product_id
+          );
+          if (index !== -1) {
+            errorMap[index] = "stock";
+          }
+        });
+        setLineErrors(errorMap);
+        alert("Some products are out of stock. Please adjust.");
+      } else {
+        setStatus(json.error || "Unable to place order.");
+      }
+      setOrderSaving(false);
       return;
     }
-    closeModal();
-    loadProducts();
+
+    await loadProducts();
     showToast("Order saved.");
+    closeOrderModal();
+    setOrderSaving(false);
   }
 
   const filteredProducts = useMemo(() => {
@@ -107,22 +185,33 @@ export default function PlaceOrderClient() {
         </div>
       ) : null}
       <section className="rounded-[28px] border border-black/10 bg-white/80 p-6 shadow-sm">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
             <h2 className="font-serif text-2xl text-[color:var(--ink)]">
               Ready-to-sell products
             </h2>
             <p className="mt-1 text-sm text-black/60">
-              Click any item to record a sale.
+              Review current stock and place new orders.
             </p>
+            </div>
+            <div className="flex w-full flex-wrap items-center gap-3 sm:w-auto">
+              <input
+                value={productQuery}
+                onChange={(event) => setProductQuery(event.target.value)}
+                placeholder="Search by item name"
+                className="w-full rounded-full border border-black/10 bg-white px-4 py-2 text-sm text-black/70 focus:border-[color:var(--sage)] focus:outline-none sm:w-64"
+              />
+              <button
+                type="button"
+                onClick={openOrderModal}
+                className="hover:cursor-pointer flex gap-1 items-center rounded-full bg-[color:var(--ink)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white transition hover:bg-black disabled:cursor-not-allowed disabled:opacity-70"
+                disabled={productsLoading}
+              >
+                <PlusCircleIcon className="text-white h-4" />
+                Place an order
+              </button>
+            </div>
           </div>
-          <input
-            value={productQuery}
-            onChange={(event) => setProductQuery(event.target.value)}
-            placeholder="Search by item name"
-            className="w-full rounded-full border border-black/10 bg-white px-4 py-2 text-sm text-black/70 focus:border-[color:var(--sage)] focus:outline-none sm:w-64"
-          />
-        </div>
         <div className="mt-6 overflow-x-auto">
           <table className="w-full min-w-[720px] text-left text-sm">
             <thead>
@@ -131,10 +220,19 @@ export default function PlaceOrderClient() {
                 <th>Batch</th>
                 <th>Selling</th>
                 <th>Stock</th>
-                <th></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-black/5">
+              {productsLoading ? (
+                <tr>
+                  <td
+                    colSpan={5}
+                    className="py-10 text-center text-sm text-black/50"
+                  >
+                    Loading products...
+                  </td>
+                </tr>
+              ) : null}
               {pagedProducts.map((item) => (
                 <tr key={item.id} className="text-black/70">
                   <td className="py-3">
@@ -155,24 +253,15 @@ export default function PlaceOrderClient() {
                       </div>
                     </div>
                   </td>
-                  <td>{item.batches?.name || "—"}</td>
+                  <td>{item.batches?.name || "-"}</td>
                   <td>{item.selling_price}</td>
                   <td>{item.current_quantity}</td>
-                  <td className="text-right">
-                    <button
-                      type="button"
-                      onClick={() => openModal(item)}
-                      className="rounded-full border border-black/15 px-4 py-2 text-xs font-semibold text-black transition hover:border-transparent hover:bg-[color:var(--clay)]"
-                    >
-                      Place order
-                    </button>
-                  </td>
                 </tr>
               ))}
-              {!filteredProducts.length ? (
+              {!productsLoading && !filteredProducts.length ? (
                 <tr>
                   <td
-                    colSpan={5}
+                    colSpan={4}
                     className="py-10 text-center text-sm text-black/50"
                   >
                     No products yet. Add items first.
@@ -209,91 +298,120 @@ export default function PlaceOrderClient() {
         </div>
       </section>
 
-      {selected ? (
+      {isOrderOpen ? (
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-lg rounded-[28px] bg-white p-6 shadow-[var(--shadow)]">
+          <div className="w-full max-w-2xl rounded-[28px] bg-white p-6 shadow-[var(--shadow)]">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-xs uppercase tracking-[0.2em] text-black/50">
                   Place order
                 </p>
                 <h3 className="mt-2 font-serif text-2xl text-[color:var(--ink)]">
-                  {selected.name}
+                  New order
                 </h3>
-                <p className="mt-1 text-sm text-black/60">
-                  Available: {selected.current_quantity}
-                </p>
               </div>
               <button
                 type="button"
-                onClick={closeModal}
+                onClick={closeOrderModal}
                 className="rounded-full border border-black/10 px-3 py-1 text-xs text-black/60"
               >
                 Close
               </button>
             </div>
-            <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-              <div>
-                <label className="text-xs uppercase tracking-[0.2em] text-black/50">
-                  Quantity
-                </label>
-                <input
-                  value={order.quantity}
-                  onChange={(event) =>
-                    setOrder((prev) => ({
-                      ...prev,
-                      quantity: event.target.value,
-                    }))
-                  }
-                  type="number"
-                  min="1"
-                  step="1"
-                  className="mt-2 w-full rounded-2xl border border-black/10 px-4 py-3 text-sm focus:border-[color:var(--sage)] focus:outline-none"
-                  required
-                />
+            <form onSubmit={handleOrderSubmit} className="mt-6 space-y-5">
+              {orderLines.map((line, index) => (
+                <div
+                  key={`line-${index}`}
+                  className="grid gap-3 rounded-2xl border border-black/10 bg-white/80 p-4 md:grid-cols-[1.4fr_0.6fr_0.8fr]"
+                >
+                  <div className="flex flex-col gap-2">
+                    <label className="text-xs uppercase tracking-[0.2em] text-black/50">
+                      Product
+                    </label>
+                    <input
+                      list="product-options"
+                      value={line.product_name}
+                      onChange={(event) =>
+                        handleProductNameChange(index, event.target.value)
+                      }
+                      placeholder="Select product"
+                      className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm focus:border-[color:var(--sage)] focus:outline-none"
+                      required
+                    />
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <label className="text-xs uppercase tracking-[0.2em] text-black/50">
+                      Quantity
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      step="1"
+                      value={line.quantity}
+                      onChange={(event) =>
+                        updateLine(index, { quantity: event.target.value })
+                      }
+                      className={`rounded-2xl border bg-white px-4 py-3 text-sm focus:outline-none ${
+                        lineErrors[index]
+                          ? "border-[color:var(--copper)]"
+                          : "border-black/10 focus:border-[color:var(--sage)]"
+                      }`}
+                      required
+                    />
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <label className="text-xs uppercase tracking-[0.2em] text-black/50">
+                      Selling price
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={line.selling_price}
+                      onChange={(event) =>
+                        updateLine(index, { selling_price: event.target.value })
+                      }
+                      className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm focus:border-[color:var(--sage)] focus:outline-none w-full"
+                      required
+                    />
+                  </div>
+                </div>
+              ))}
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={addLine}
+                  className="flex h-11 w-11 items-center justify-center rounded-full text-xs font-semibold uppercase tracking-[0.2em] text-black/70"
+                >
+                  <PlusCircleIcon className="hover:cursor-pointer text-black/70" />
+                </button>
               </div>
-              <div>
+
+              <datalist id="product-options">
+                {products.map((product) => (
+                  <option key={product.id} value={product.name} />
+                ))}
+              </datalist>
+
+              <div className="flex flex-col gap-2">
                 <label className="text-xs uppercase tracking-[0.2em] text-black/50">
-                  Selling price
+                  Address
                 </label>
-                <input
-                  value={order.selling_price}
-                  onChange={(event) =>
-                    setOrder((prev) => ({
-                      ...prev,
-                      selling_price: event.target.value,
-                    }))
-                  }
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  className="mt-2 w-full rounded-2xl border border-black/10 px-4 py-3 text-sm focus:border-[color:var(--sage)] focus:outline-none"
+                <textarea
+                  value={address}
+                  onChange={(event) => setAddress(event.target.value)}
+                  rows={3}
+                  placeholder="Shipping address"
+                  className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm focus:border-[color:var(--sage)] focus:outline-none"
                   required
-                />
-              </div>
-              <div>
-                <label className="text-xs uppercase tracking-[0.2em] text-black/50">
-                  Shipping charge
-                </label>
-                <input
-                  value={order.shipping_charge}
-                  onChange={(event) =>
-                    setOrder((prev) => ({
-                      ...prev,
-                      shipping_charge: event.target.value,
-                    }))
-                  }
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  className="mt-2 w-full rounded-2xl border border-black/10 px-4 py-3 text-sm focus:border-[color:var(--sage)] focus:outline-none"
                 />
               </div>
               <button
                 type="submit"
-                className="w-full rounded-full bg-[color:var(--ink)] px-5 py-3 text-sm font-semibold text-white transition hover:bg-black"
+                className="w-full rounded-full bg-[color:var(--ink)] px-5 py-3 text-sm font-semibold text-white transition hover:bg-black disabled:cursor-not-allowed disabled:opacity-70"
+                disabled={orderSaving}
               >
-                Save order
+                {orderSaving ? "Saving..." : "Save order"}
               </button>
             </form>
           </div>

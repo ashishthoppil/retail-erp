@@ -6,8 +6,8 @@ import StockReminder from "./components/StockReminder";
 export default function Home() {
   return (
     <AppShell
-      title="Inventory at a glance."
-      subtitle="Track batches, add new decor items, and place orders for your home studio without the fuss."
+      title=""
+      subtitle=""
     >
       <section className="space-y-6">
         <CapitalCard />
@@ -31,7 +31,7 @@ export default function Home() {
               href: "/reports",
             },
             {
-              title: "Add Expenses",
+              title: "Add Expense",
               description: "Log outgoing costs and adjust capital.",
               href: "/expenses",
             },

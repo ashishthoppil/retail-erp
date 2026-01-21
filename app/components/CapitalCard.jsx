@@ -8,6 +8,7 @@ export default function CapitalCard() {
   const [current, setCurrent] = useState(null);
   const [status, setStatus] = useState("");
   const [toast, setToast] = useState({ message: "", visible: false });
+  const [capitalSaving, setCapitalSaving] = useState(false);
 
   useEffect(() => {
     async function loadCapital() {
@@ -32,6 +33,7 @@ export default function CapitalCard() {
   async function handleSubmit(event) {
     event.preventDefault();
     setStatus("");
+    setCapitalSaving(true);
     const response = await fetch("/api/capital", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -40,11 +42,13 @@ export default function CapitalCard() {
     const json = await response.json();
     if (!response.ok) {
       setStatus(json.error || "Unable to save capital.");
+      setCapitalSaving(false);
       return;
     }
     setCurrent(json.data);
     setAmount("");
     showToast("Capital updated.");
+    setCapitalSaving(false);
   }
 
   const formatted = new Intl.NumberFormat("en-IN", {
@@ -70,7 +74,7 @@ export default function CapitalCard() {
               : "Set the starting cash for inventory."}
           </p>
         </div>
-        <form onSubmit={handleSubmit} className="flex flex-wrap gap-3">
+        <form onSubmit={handleSubmit} className="flex flex-wrap gap-3 justify-end">
           <input
             value={amount}
             onChange={(event) => setAmount(event.target.value)}
@@ -82,9 +86,14 @@ export default function CapitalCard() {
           />
           <button
             type="submit"
-            className="rounded-full bg-[color:var(--ink)] px-5 py-2 text-sm font-semibold text-white transition hover:bg-black"
+            className="rounded-full bg-[color:var(--ink)] px-5 py-2 text-sm font-semibold text-white transition hover:bg-black disabled:cursor-not-allowed disabled:opacity-70"
+            disabled={capitalSaving}
           >
-            {current ? "Add more capital" : "Save"}
+            {capitalSaving
+              ? "Saving..."
+              : current
+                ? "Add more capital"
+                : "Save"}
           </button>
         </form>
       </div>

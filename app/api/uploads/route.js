@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getSupabaseAdmin } from "@/app/lib/supabase";
+import { getSupabaseServer } from "@/app/lib/supabase-server";
 
 export const runtime = "nodejs";
 
@@ -19,9 +19,17 @@ export async function POST(request) {
       );
     }
 
-    const supabase = getSupabaseAdmin();
+    const supabase = getSupabaseServer();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+    }
     const buffer = Buffer.from(await file.arrayBuffer());
-    const filename = `${Date.now()}-${sanitizeFileName(file.name || "image")}`;
+    const filename = `${user.id}/${Date.now()}-${sanitizeFileName(
+      file.name || "image"
+    )}`;
     const bucket = "product-images";
 
     const { error: uploadError } = await supabase.storage

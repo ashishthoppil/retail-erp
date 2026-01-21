@@ -17,6 +17,10 @@ export default function ExpensesClient() {
   const [editingExpense, setEditingExpense] = useState(null);
   const [status, setStatus] = useState("");
   const [toast, setToast] = useState({ message: "", visible: false });
+  const [expensesLoading, setExpensesLoading] = useState(true);
+  const [expenseSaving, setExpenseSaving] = useState(false);
+  const [expenseUpdatingId, setExpenseUpdatingId] = useState(null);
+  const [expenseDeletingId, setExpenseDeletingId] = useState(null);
   const [expenseQuery, setExpenseQuery] = useState("");
   const [expensePage, setExpensePage] = useState(1);
 
@@ -36,18 +40,22 @@ export default function ExpensesClient() {
   }
 
   async function loadExpenses() {
+    setExpensesLoading(true);
     const response = await fetch("/api/expenses");
     const json = await response.json();
     if (!response.ok) {
       setStatus(json.error || "Unable to load expenses.");
+      setExpensesLoading(false);
       return;
     }
     setExpenses(json.data || []);
+    setExpensesLoading(false);
   }
 
   async function handleSubmit(event) {
     event.preventDefault();
     setStatus("");
+    setExpenseSaving(true);
     const response = await fetch("/api/expenses", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -56,11 +64,13 @@ export default function ExpensesClient() {
     const json = await response.json();
     if (!response.ok) {
       setStatus(json.error || "Unable to save expense.");
+      setExpenseSaving(false);
       return;
     }
     setForm(emptyExpense);
     setExpenses((prev) => [json.data, ...prev]);
     showToast("Expense saved.");
+    setExpenseSaving(false);
   }
 
   function startEdit(expense) {
@@ -79,6 +89,7 @@ export default function ExpensesClient() {
   async function handleUpdate(expenseId) {
     if (!editingExpense) return;
     setStatus("");
+    setExpenseUpdatingId(expenseId);
     const response = await fetch("/api/expenses", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -87,6 +98,7 @@ export default function ExpensesClient() {
     const json = await response.json();
     if (!response.ok) {
       setStatus(json.error || "Unable to update expense.");
+      setExpenseUpdatingId(null);
       return;
     }
     setExpenses((prev) =>
@@ -94,12 +106,14 @@ export default function ExpensesClient() {
     );
     cancelEdit();
     showToast("Expense updated.");
+    setExpenseUpdatingId(null);
   }
 
   async function handleDelete(expenseId) {
     const confirmed = window.confirm("Delete this expense?");
     if (!confirmed) return;
     setStatus("");
+    setExpenseDeletingId(expenseId);
     const response = await fetch("/api/expenses", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
@@ -108,10 +122,12 @@ export default function ExpensesClient() {
     const json = await response.json();
     if (!response.ok) {
       setStatus(json.error || "Unable to delete expense.");
+      setExpenseDeletingId(null);
       return;
     }
     setExpenses((prev) => prev.filter((item) => item.id !== expenseId));
     showToast("Expense deleted.");
+    setExpenseDeletingId(null);
   }
 
   const filteredExpenses = useMemo(() => {
@@ -179,9 +195,10 @@ export default function ExpensesClient() {
           </div>
           <button
             type="submit"
-            className="md:col-span-2 rounded-full bg-[color:var(--ink)] px-5 py-3 text-sm font-semibold text-white transition hover:bg-black"
+            className="hover:cursor-pointer md:col-span-2 rounded-full bg-[color:var(--ink)] px-5 py-3 text-sm font-semibold text-white transition hover:bg-black disabled:cursor-not-allowed disabled:opacity-70"
+            disabled={expenseSaving}
           >
-            Save Expense
+            {expenseSaving ? "Saving..." : "Save Expense"}
           </button>
         </form>
         {status ? (
@@ -212,6 +229,16 @@ export default function ExpensesClient() {
               </tr>
             </thead>
             <tbody className="divide-y divide-black/5">
+              {expensesLoading ? (
+                <tr>
+                  <td
+                    colSpan={4}
+                    className="py-8 text-center text-sm text-black/50"
+                  >
+                    Loading expenses...
+                  </td>
+                </tr>
+              ) : null}
               {pagedExpenses.map((expense) => {
                 const isEditing = editingId === expense.id;
                 return (
@@ -262,14 +289,18 @@ export default function ExpensesClient() {
                           <button
                             type="button"
                             onClick={() => handleUpdate(expense.id)}
-                            className="rounded-full bg-[color:var(--ink)] px-3 py-1 text-[10px] font-semibold text-white"
+                            className="rounded-full bg-[color:var(--ink)] px-3 py-1 text-[10px] font-semibold text-white disabled:cursor-not-allowed disabled:opacity-70"
+                            disabled={expenseUpdatingId === expense.id}
                           >
-                            Save
+                            {expenseUpdatingId === expense.id
+                              ? "Saving..."
+                              : "Save"}
                           </button>
                           <button
                             type="button"
                             onClick={cancelEdit}
-                            className="rounded-full border border-black/20 px-3 py-1 text-[10px]"
+                            className="rounded-full border border-black/20 px-3 py-1 text-[10px] disabled:cursor-not-allowed disabled:opacity-70"
+                            disabled={expenseUpdatingId === expense.id}
                           >
                             Cancel
                           </button>
@@ -279,16 +310,20 @@ export default function ExpensesClient() {
                           <button
                             type="button"
                             onClick={() => startEdit(expense)}
-                            className="rounded-full border border-black/15 px-3 py-1 text-[10px] font-semibold"
+                            className="hover:cursor-pointer rounded-full border border-black/15 px-3 py-1 text-[10px] font-semibold disabled:cursor-not-allowed disabled:opacity-70"
+                            disabled={expenseDeletingId === expense.id}
                           >
                             Edit
                           </button>
                           <button
                             type="button"
                             onClick={() => handleDelete(expense.id)}
-                            className="rounded-full border border-black/10 px-3 py-1 text-[10px] text-black/60"
+                            className="hover:cursor-pointer rounded-full border border-black/10 px-3 py-1 text-[10px] text-black/60 disabled:cursor-not-allowed disabled:opacity-70"
+                            disabled={expenseDeletingId === expense.id}
                           >
-                            Delete
+                            {expenseDeletingId === expense.id
+                              ? "Deleting..."
+                              : "Delete"}
                           </button>
                         </div>
                       )}
@@ -296,7 +331,7 @@ export default function ExpensesClient() {
                   </tr>
                 );
               })}
-              {!filteredExpenses.length ? (
+              {!expensesLoading && !filteredExpenses.length ? (
                 <tr>
                   <td
                     colSpan={4}
@@ -318,7 +353,7 @@ export default function ExpensesClient() {
               type="button"
               onClick={() => setExpensePage((prev) => Math.max(1, prev - 1))}
               disabled={expensePage === 1}
-              className="rounded-full border border-black/10 bg-white px-3 py-1 text-xs uppercase tracking-[0.2em] text-black/70 disabled:cursor-not-allowed disabled:opacity-50"
+              className="hover:cursor-pointer rounded-full border border-black/10 bg-white px-3 py-1 text-xs uppercase tracking-[0.2em] text-black/70 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Prev
             </button>
@@ -328,7 +363,7 @@ export default function ExpensesClient() {
                 setExpensePage((prev) => Math.min(totalPages, prev + 1))
               }
               disabled={expensePage === totalPages}
-              className="rounded-full border border-black/10 bg-white px-3 py-1 text-xs uppercase tracking-[0.2em] text-black/70 disabled:cursor-not-allowed disabled:opacity-50"
+              className="hover:cursor-pointer rounded-full border border-black/10 bg-white px-3 py-1 text-xs uppercase tracking-[0.2em] text-black/70 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Next
             </button>

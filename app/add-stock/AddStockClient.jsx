@@ -21,6 +21,14 @@ export default function AddStockClient() {
   const [toast, setToast] = useState({ message: "", visible: false });
   const [batches, setBatches] = useState([]);
   const [products, setProducts] = useState([]);
+  const [batchesLoading, setBatchesLoading] = useState(true);
+  const [productsLoading, setProductsLoading] = useState(true);
+  const [batchSaving, setBatchSaving] = useState(false);
+  const [productSaving, setProductSaving] = useState(false);
+  const [batchUpdatingId, setBatchUpdatingId] = useState(null);
+  const [batchDeletingId, setBatchDeletingId] = useState(null);
+  const [productUpdatingId, setProductUpdatingId] = useState(null);
+  const [productDeletingId, setProductDeletingId] = useState(null);
   const [editingBatchId, setEditingBatchId] = useState(null);
   const [editingBatchName, setEditingBatchName] = useState("");
   const [editingProductId, setEditingProductId] = useState(null);
@@ -55,6 +63,8 @@ export default function AddStockClient() {
   }
 
   async function loadData() {
+    setBatchesLoading(true);
+    setProductsLoading(true);
     const [batchRes, productRes] = await Promise.all([
       fetch("/api/batches"),
       fetch("/api/products"),
@@ -74,6 +84,8 @@ export default function AddStockClient() {
     } else {
       setProducts(productJson.data || []);
     }
+    setBatchesLoading(false);
+    setProductsLoading(false);
   }
 
   useEffect(() => {
@@ -91,6 +103,7 @@ export default function AddStockClient() {
   async function handleBatchSubmit(event) {
     event.preventDefault();
     setStatus("");
+    setBatchSaving(true);
     const response = await fetch("/api/batches", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -99,11 +112,13 @@ export default function AddStockClient() {
     const json = await response.json();
     if (!response.ok) {
       setStatus(json.error || "Unable to save batch.");
+      setBatchSaving(false);
       return;
     }
     setBatchName("");
     setBatches((prev) => [json.data, ...prev]);
     showToast("Batch saved.");
+    setBatchSaving(false);
   }
 
   function startBatchEdit(batch) {
@@ -118,6 +133,7 @@ export default function AddStockClient() {
 
   async function handleBatchUpdate(batchId) {
     setStatus("");
+    setBatchUpdatingId(batchId);
     const response = await fetch("/api/batches", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -126,6 +142,7 @@ export default function AddStockClient() {
     const json = await response.json();
     if (!response.ok) {
       setStatus(json.error || "Unable to update batch.");
+      setBatchUpdatingId(null);
       return;
     }
     setBatches((prev) =>
@@ -133,12 +150,14 @@ export default function AddStockClient() {
     );
     cancelBatchEdit();
     showToast("Batch updated.");
+    setBatchUpdatingId(null);
   }
 
   async function handleBatchDelete(batchId) {
     const confirmed = window.confirm("Delete this batch?");
     if (!confirmed) return;
     setStatus("");
+    setBatchDeletingId(batchId);
     const response = await fetch("/api/batches", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
@@ -147,15 +166,18 @@ export default function AddStockClient() {
     const json = await response.json();
     if (!response.ok) {
       setStatus(json.error || "Unable to delete batch.");
+      setBatchDeletingId(null);
       return;
     }
     setBatches((prev) => prev.filter((item) => item.id !== batchId));
     showToast("Batch deleted.");
+    setBatchDeletingId(null);
   }
 
   async function handleProductSubmit(event) {
     event.preventDefault();
     setStatus("");
+    setProductSaving(true);
     let image_url = product.image_url?.trim() || null;
 
     if (productFile) {
@@ -168,6 +190,7 @@ export default function AddStockClient() {
       const uploadJson = await uploadResponse.json();
       if (!uploadResponse.ok) {
         setStatus(uploadJson.error || "Unable to upload image.");
+        setProductSaving(false);
         return;
       }
       image_url = uploadJson.data?.publicUrl || image_url;
@@ -181,12 +204,14 @@ export default function AddStockClient() {
     const json = await response.json();
     if (!response.ok) {
       setStatus(json.error || "Unable to save product.");
+      setProductSaving(false);
       return;
     }
     setProduct(emptyProduct);
     setProductFile(null);
     setProducts((prev) => [json.data, ...prev]);
     showToast("Product saved.");
+    setProductSaving(false);
   }
 
   function startProductEdit(item) {
@@ -211,6 +236,7 @@ export default function AddStockClient() {
   async function handleProductUpdate(productId) {
     if (!editingProduct) return;
     setStatus("");
+    setProductUpdatingId(productId);
     let image_url = editingProduct.image_url?.trim() || null;
 
     if (editingProductFile) {
@@ -223,6 +249,7 @@ export default function AddStockClient() {
       const uploadJson = await uploadResponse.json();
       if (!uploadResponse.ok) {
         setStatus(uploadJson.error || "Unable to upload image.");
+        setProductUpdatingId(null);
         return;
       }
       image_url = uploadJson.data?.publicUrl || image_url;
@@ -236,6 +263,7 @@ export default function AddStockClient() {
     const json = await response.json();
     if (!response.ok) {
       setStatus(json.error || "Unable to update product.");
+      setProductUpdatingId(null);
       return;
     }
     setProducts((prev) =>
@@ -243,12 +271,14 @@ export default function AddStockClient() {
     );
     cancelProductEdit();
     showToast("Product updated.");
+    setProductUpdatingId(null);
   }
 
   async function handleProductDelete(productId) {
     const confirmed = window.confirm("Delete this product?");
     if (!confirmed) return;
     setStatus("");
+    setProductDeletingId(productId);
     const response = await fetch("/api/products", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
@@ -257,10 +287,12 @@ export default function AddStockClient() {
     const json = await response.json();
     if (!response.ok) {
       setStatus(json.error || "Unable to delete product.");
+      setProductDeletingId(null);
       return;
     }
     setProducts((prev) => prev.filter((item) => item.id !== productId));
     showToast("Product deleted.");
+    setProductDeletingId(null);
   }
 
   const filteredBatches = useMemo(() => {
@@ -328,9 +360,10 @@ export default function AddStockClient() {
           </div>
           <button
             type="submit"
-            className="mt-6 w-full rounded-full bg-[color:var(--ink)] px-5 py-3 text-sm font-semibold text-white transition hover:bg-black"
+            className="mt-6 w-full rounded-full bg-[color:var(--ink)] px-5 py-3 text-sm font-semibold text-white transition hover:bg-black disabled:cursor-not-allowed disabled:opacity-70  hover:cursor-pointer"
+            disabled={batchSaving}
           >
-            Save Batch
+            {batchSaving ? "Saving..." : "Save Batch"}
           </button>
           <input
             value={batchQuery}
@@ -347,7 +380,18 @@ export default function AddStockClient() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-black/5">
-                {pagedBatches.map((batch) => (
+                {batchesLoading ? (
+                  <tr>
+                    <td
+                      colSpan={2}
+                      className="px-4 py-4 text-center text-[11px] text-black/40"
+                    >
+                      Loading batches...
+                    </td>
+                  </tr>
+                ) : null}
+                {!batchesLoading &&
+                  pagedBatches.map((batch) => (
                   <tr key={batch.id} className="text-black/70">
                     <td className="px-4 py-3">
                       {editingBatchId === batch.id ? (
@@ -370,14 +414,16 @@ export default function AddStockClient() {
                           <button
                             type="button"
                             onClick={() => handleBatchUpdate(batch.id)}
-                            className="rounded-full bg-[color:var(--ink)] px-3 py-1 text-[10px] font-semibold text-white"
+                            className="rounded-full bg-[color:var(--ink)] px-3 py-1 text-[10px] font-semibold text-white disabled:cursor-not-allowed disabled:opacity-70"
+                            disabled={batchUpdatingId === batch.id}
                           >
-                            Save
+                            {batchUpdatingId === batch.id ? "Saving..." : "Save"}
                           </button>
                           <button
                             type="button"
                             onClick={cancelBatchEdit}
-                            className="rounded-full border border-black/20 px-3 py-1 text-[10px]"
+                            className="rounded-full border border-black/20 px-3 py-1 text-[10px] disabled:cursor-not-allowed disabled:opacity-70"
+                            disabled={batchUpdatingId === batch.id}
                           >
                             Cancel
                           </button>
@@ -387,23 +433,27 @@ export default function AddStockClient() {
                           <button
                             type="button"
                             onClick={() => startBatchEdit(batch)}
-                            className="rounded-full border border-black/15 px-3 py-1 text-[10px] font-semibold"
+                            className="hover:cursor-pointer rounded-full border border-black/15 px-3 py-1 text-[10px] font-semibold disabled:cursor-not-allowed disabled:opacity-70"
+                            disabled={batchDeletingId === batch.id}
                           >
                             Edit
                           </button>
                           <button
                             type="button"
                             onClick={() => handleBatchDelete(batch.id)}
-                            className="rounded-full border border-black/10 px-3 py-1 text-[10px] text-black/60"
+                            className="hover:cursor-pointer rounded-full border border-black/10 px-3 py-1 text-[10px] text-black/60 disabled:cursor-not-allowed disabled:opacity-70"
+                            disabled={batchDeletingId === batch.id}
                           >
-                            Delete
+                            {batchDeletingId === batch.id
+                              ? "Deleting..."
+                              : "Delete"}
                           </button>
                         </div>
                       )}
                     </td>
                   </tr>
                 ))}
-                {!filteredBatches.length ? (
+                {!batchesLoading && !filteredBatches.length ? (
                   <tr>
                     <td
                       colSpan={2}
@@ -425,7 +475,7 @@ export default function AddStockClient() {
                 type="button"
                 onClick={() => setBatchPage((prev) => Math.max(1, prev - 1))}
                 disabled={batchPage === 1}
-                className="rounded-full border border-black/10 bg-white px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-black/70 disabled:cursor-not-allowed disabled:opacity-50"
+                className="hover:cursor-pointer rounded-full border border-black/10 bg-white px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-black/70 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Prev
               </button>
@@ -435,7 +485,7 @@ export default function AddStockClient() {
                   setBatchPage((prev) => Math.min(batchPages, prev + 1))
                 }
                 disabled={batchPage === batchPages}
-                className="rounded-full border border-black/10 bg-white px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-black/70 disabled:cursor-not-allowed disabled:opacity-50"
+                className="hover:cursor-pointer rounded-full border border-black/10 bg-white px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-black/70 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Next
               </button>
@@ -573,9 +623,10 @@ export default function AddStockClient() {
           ) : null}
           <button
             type="submit"
-            className="mt-6 w-full rounded-full bg-[color:var(--ink)] px-5 py-3 text-sm font-semibold text-white transition hover:bg-black"
+            className="hover:cursor-pointer mt-6 w-full rounded-full bg-[color:var(--ink)] px-5 py-3 text-sm font-semibold text-white transition hover:bg-black disabled:cursor-not-allowed disabled:opacity-70"
+            disabled={productSaving}
           >
-            Save Product
+            {productSaving ? "Saving..." : "Save Product"}
           </button>
         </form>
       </section>
@@ -617,6 +668,16 @@ export default function AddStockClient() {
               </tr>
             </thead>
             <tbody className="divide-y divide-black/5">
+              {productsLoading ? (
+                <tr>
+                  <td
+                    colSpan={6}
+                    className="py-10 text-center text-sm text-black/50"
+                  >
+                    Loading products...
+                  </td>
+                </tr>
+              ) : null}
               {pagedProducts.map((item) => {
                 const isEditing = editingProductId === item.id;
                 return (
@@ -750,14 +811,16 @@ export default function AddStockClient() {
                           <button
                             type="button"
                             onClick={() => handleProductUpdate(item.id)}
-                            className="rounded-full bg-[color:var(--ink)] px-3 py-1 text-[10px] font-semibold text-white"
+                            className="rounded-full bg-[color:var(--ink)] px-3 py-1 text-[10px] font-semibold text-white disabled:cursor-not-allowed disabled:opacity-70"
+                            disabled={productUpdatingId === item.id}
                           >
-                            Save
+                            {productUpdatingId === item.id ? "Saving..." : "Save"}
                           </button>
                           <button
                             type="button"
                             onClick={cancelProductEdit}
-                            className="rounded-full border border-black/20 px-3 py-1 text-[10px]"
+                            className="rounded-full border border-black/20 px-3 py-1 text-[10px] disabled:cursor-not-allowed disabled:opacity-70"
+                            disabled={productUpdatingId === item.id}
                           >
                             Cancel
                           </button>
@@ -767,16 +830,20 @@ export default function AddStockClient() {
                           <button
                             type="button"
                             onClick={() => startProductEdit(item)}
-                            className="rounded-full border border-black/15 px-3 py-1 text-[10px] font-semibold"
+                            className="hover:cursor-pointer rounded-full border border-black/15 px-3 py-1 text-[10px] font-semibold disabled:cursor-not-allowed disabled:opacity-70"
+                            disabled={productDeletingId === item.id}
                           >
                             Edit
                           </button>
                           <button
                             type="button"
                             onClick={() => handleProductDelete(item.id)}
-                            className="rounded-full border border-black/10 px-3 py-1 text-[10px] text-black/60"
+                            className="hover:cursor-pointer rounded-full border border-black/10 px-3 py-1 text-[10px] text-black/60 disabled:cursor-not-allowed disabled:opacity-70"
+                            disabled={productDeletingId === item.id}
                           >
-                            Delete
+                            {productDeletingId === item.id
+                              ? "Deleting..."
+                              : "Delete"}
                           </button>
                         </div>
                       )}
@@ -784,7 +851,7 @@ export default function AddStockClient() {
                   </tr>
                 );
               })}
-              {!filteredProducts.length ? (
+              {!productsLoading && !filteredProducts.length ? (
                 <tr>
                   <td
                     colSpan={6}
@@ -806,7 +873,7 @@ export default function AddStockClient() {
               type="button"
               onClick={() => setProductPage((prev) => Math.max(1, prev - 1))}
               disabled={productPage === 1}
-              className="rounded-full border border-black/10 bg-white px-3 py-1 text-xs uppercase tracking-[0.2em] text-black/70 disabled:cursor-not-allowed disabled:opacity-50"
+              className="hover:cursor-pointer rounded-full border border-black/10 bg-white px-3 py-1 text-xs uppercase tracking-[0.2em] text-black/70 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Prev
             </button>
@@ -816,7 +883,7 @@ export default function AddStockClient() {
                 setProductPage((prev) => Math.min(productPages, prev + 1))
               }
               disabled={productPage === productPages}
-              className="rounded-full border border-black/10 bg-white px-3 py-1 text-xs uppercase tracking-[0.2em] text-black/70 disabled:cursor-not-allowed disabled:opacity-50"
+              className="hover:cursor-pointer rounded-full border border-black/10 bg-white px-3 py-1 text-xs uppercase tracking-[0.2em] text-black/70 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Next
             </button>

@@ -2,12 +2,14 @@ create extension if not exists "pgcrypto";
 
 create table if not exists public.batches (
   id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
   name text not null,
   created_at timestamptz not null default now()
 );
 
 create table if not exists public.products (
   id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
   batch_id uuid references public.batches(id) on delete set null,
   image_url text,
   name text not null,
@@ -20,28 +22,76 @@ create table if not exists public.products (
 
 create table if not exists public.orders (
   id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  address text not null,
+  shipping_charge numeric(12, 2) not null default 0,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists public.order_items (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  order_id uuid references public.orders(id) on delete cascade,
   product_id uuid references public.products(id) on delete set null,
   quantity integer not null,
   selling_price numeric(12, 2) not null,
-  shipping_charge numeric(12, 2) not null default 0,
   created_at timestamptz not null default now()
 );
 
 create table if not exists public.capital (
   id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
   amount numeric(12, 2) not null,
   created_at timestamptz not null default now()
 );
 
 create table if not exists public.expenses (
   id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
   expense_type text not null,
   amount numeric(12, 2) not null,
   created_at timestamptz not null default now()
 );
 
-alter table public.batches disable row level security;
-alter table public.products disable row level security;
-alter table public.orders disable row level security;
-alter table public.capital disable row level security;
-alter table public.expenses disable row level security;
+alter table public.batches enable row level security;
+alter table public.products enable row level security;
+alter table public.orders enable row level security;
+alter table public.capital enable row level security;
+alter table public.expenses enable row level security;
+alter table public.order_items enable row level security;
+
+create policy "Batches are user-scoped"
+  on public.batches
+  for all
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
+create policy "Products are user-scoped"
+  on public.products
+  for all
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
+create policy "Orders are user-scoped"
+  on public.orders
+  for all
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
+create policy "Order items are user-scoped"
+  on public.order_items
+  for all
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
+create policy "Capital is user-scoped"
+  on public.capital
+  for all
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
+create policy "Expenses are user-scoped"
+  on public.expenses
+  for all
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);

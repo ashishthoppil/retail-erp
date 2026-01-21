@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
-import { getSupabaseAdmin } from "@/app/lib/supabase";
+import { getSupabaseServer } from "@/app/lib/supabase-server";
 
-async function getLatestCapital(supabase) {
+async function getLatestCapital(supabase, userId) {
   const { data, error } = await supabase
     .from("capital")
     .select("*")
+    .eq("user_id", userId)
     .order("created_at", { ascending: false })
     .limit(1)
     .single();
@@ -18,10 +19,17 @@ async function getLatestCapital(supabase) {
 
 export async function GET() {
   try {
-    const supabase = getSupabaseAdmin();
+    const supabase = getSupabaseServer();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+    }
     const { data, error } = await supabase
       .from("expenses")
       .select("*")
+      .eq("user_id", user.id)
       .order("created_at", { ascending: false });
 
     if (error) throw error;
@@ -39,7 +47,13 @@ export async function GET() {
 
 export async function POST(request) {
   try {
-    const supabase = getSupabaseAdmin();
+    const supabase = getSupabaseServer();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+    }
     const body = await request.json();
     const expense_type = body?.expense_type?.trim();
     const amount = Number(body?.amount);
@@ -58,7 +72,7 @@ export async function POST(request) {
       );
     }
 
-    const capital = await getLatestCapital(supabase);
+    const capital = await getLatestCapital(supabase, user.id);
     if (!capital) {
       return NextResponse.json(
         { error: "Set initial capital before adding expenses." },
@@ -68,7 +82,7 @@ export async function POST(request) {
 
     const { data: expense, error: expenseError } = await supabase
       .from("expenses")
-      .insert({ expense_type, amount })
+      .insert({ expense_type, amount, user_id: user.id })
       .select("*")
       .single();
 
@@ -78,7 +92,8 @@ export async function POST(request) {
     const { error: capitalError } = await supabase
       .from("capital")
       .update({ amount: newAmount })
-      .eq("id", capital.id);
+      .eq("id", capital.id)
+      .eq("user_id", user.id);
 
     if (capitalError) throw capitalError;
 
@@ -95,7 +110,13 @@ export async function POST(request) {
 
 export async function PATCH(request) {
   try {
-    const supabase = getSupabaseAdmin();
+    const supabase = getSupabaseServer();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+    }
     const body = await request.json();
     const id = body?.id;
     const expense_type = body?.expense_type?.trim();
@@ -119,11 +140,12 @@ export async function PATCH(request) {
       .from("expenses")
       .select("id, amount")
       .eq("id", id)
+      .eq("user_id", user.id)
       .single();
 
     if (existingError) throw existingError;
 
-    const capital = await getLatestCapital(supabase);
+    const capital = await getLatestCapital(supabase, user.id);
     if (!capital) {
       return NextResponse.json(
         { error: "Set initial capital before editing expenses." },
@@ -135,6 +157,7 @@ export async function PATCH(request) {
       .from("expenses")
       .update({ expense_type, amount })
       .eq("id", id)
+      .eq("user_id", user.id)
       .select("*")
       .single();
 
@@ -145,7 +168,8 @@ export async function PATCH(request) {
     const { error: capitalError } = await supabase
       .from("capital")
       .update({ amount: newAmount })
-      .eq("id", capital.id);
+      .eq("id", capital.id)
+      .eq("user_id", user.id);
 
     if (capitalError) throw capitalError;
 
@@ -162,7 +186,13 @@ export async function PATCH(request) {
 
 export async function DELETE(request) {
   try {
-    const supabase = getSupabaseAdmin();
+    const supabase = getSupabaseServer();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+    }
     const body = await request.json();
     const id = body?.id;
 
@@ -177,6 +207,7 @@ export async function DELETE(request) {
       .from("expenses")
       .select("id, amount")
       .eq("id", id)
+      .eq("user_id", user.id)
       .single();
 
     if (existingError) throw existingError;
@@ -188,7 +219,7 @@ export async function DELETE(request) {
 
     if (deleteError) throw deleteError;
 
-    const capital = await getLatestCapital(supabase);
+    const capital = await getLatestCapital(supabase, user.id);
     if (!capital) {
       return NextResponse.json(
         { error: "Set initial capital before deleting expenses." },
@@ -200,7 +231,8 @@ export async function DELETE(request) {
     const { error: capitalError } = await supabase
       .from("capital")
       .update({ amount: newAmount })
-      .eq("id", capital.id);
+      .eq("id", capital.id)
+      .eq("user_id", user.id);
 
     if (capitalError) throw capitalError;
 

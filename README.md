@@ -1,4 +1,4 @@
-# CasaStock
+# Trackza
 
 A responsive stock management tool built for a home decor studio. Track batches, products, orders, and revenue trends in one place.
 

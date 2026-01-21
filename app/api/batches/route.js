@@ -1,12 +1,19 @@
 import { NextResponse } from "next/server";
-import { getSupabaseAdmin } from "@/app/lib/supabase";
+import { getSupabaseServer } from "@/app/lib/supabase-server";
 
 export async function GET() {
   try {
-    const supabase = getSupabaseAdmin();
+    const supabase = getSupabaseServer();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+    }
     const { data, error } = await supabase
       .from("batches")
       .select("*")
+      .eq("user_id", user.id)
       .order("created_at", { ascending: false });
 
     if (error) throw error;
@@ -24,7 +31,13 @@ export async function GET() {
 
 export async function POST(request) {
   try {
-    const supabase = getSupabaseAdmin();
+    const supabase = getSupabaseServer();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+    }
     const body = await request.json();
     const name = body?.name?.trim();
 
@@ -37,7 +50,7 @@ export async function POST(request) {
 
     const { data, error } = await supabase
       .from("batches")
-      .insert({ name })
+      .insert({ name, user_id: user.id })
       .select("*")
       .single();
 
@@ -56,7 +69,13 @@ export async function POST(request) {
 
 export async function PATCH(request) {
   try {
-    const supabase = getSupabaseAdmin();
+    const supabase = getSupabaseServer();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+    }
     const body = await request.json();
     const id = body?.id;
     const name = body?.name?.trim();
@@ -72,6 +91,7 @@ export async function PATCH(request) {
       .from("batches")
       .update({ name })
       .eq("id", id)
+      .eq("user_id", user.id)
       .select("*")
       .single();
 
@@ -90,7 +110,13 @@ export async function PATCH(request) {
 
 export async function DELETE(request) {
   try {
-    const supabase = getSupabaseAdmin();
+    const supabase = getSupabaseServer();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+    }
     const body = await request.json();
     const id = body?.id;
 
@@ -98,7 +124,11 @@ export async function DELETE(request) {
       return NextResponse.json({ error: "Batch id is required." }, { status: 400 });
     }
 
-    const { error } = await supabase.from("batches").delete().eq("id", id);
+    const { error } = await supabase
+      .from("batches")
+      .delete()
+      .eq("id", id)
+      .eq("user_id", user.id);
 
     if (error) throw error;
 
