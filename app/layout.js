@@ -12,7 +12,7 @@ const manrope = Manrope({
 });
 
 export const metadata = {
-  title: "Trackza",
+  title: "Retail Omega",
   description: "Personal stock manager for a small businesses.",
 };
 

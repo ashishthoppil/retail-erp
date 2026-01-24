@@ -6,7 +6,7 @@ import Toast from "../components/Toast";
 import { getSupabaseBrowser } from "../lib/supabase-browser";
 
 const PLAN = {
-  name: "CasaStock Monthly",
+  name: "Retail Omega Monthly",
   amount: 49,
   currency: "INR",
   features: [
@@ -70,7 +70,7 @@ export default function PlanPage() {
       key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
       amount: json.amount,
       currency: json.currency,
-      name: "CasaStock",
+      name: "Retail Omega",
       description: PLAN.name,
       order_id: json.order_id,
       prefill: { email: data.user?.email || "" },
@@ -107,7 +107,7 @@ export default function PlanPage() {
         <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-end">
           <div>
             <p className="text-xs uppercase tracking-[0.35em] text-[color:var(--sage)]">
-              Trackza
+              Retail Omega
             </p>
             <h1 className="mt-3 font-serif text-4xl text-[color:var(--ink)]">
               Pricing

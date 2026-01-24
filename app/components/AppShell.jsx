@@ -78,7 +78,7 @@ export default function AppShell({ title, subtitle, children }) {
         <div className="flex items-center justify-between rounded-[24px] border border-black/10 bg-white/90 px-4 py-4 shadow-[var(--shadow)] backdrop-blur sm:hidden">
           <div>
             <p className="text-[11px] uppercase tracking-[0.35em] text-[color:var(--sage)]">
-              Trackza
+              Retail Omega
             </p>
             <h1 className="font-serif text-2xl text-[color:var(--ink)]">
               {title}
@@ -96,7 +96,7 @@ export default function AppShell({ title, subtitle, children }) {
         <div className="hidden flex-col gap-4 rounded-3xl border border-black/10 bg-white/80 p-6 shadow-[var(--shadow)] backdrop-blur sm:flex sm:flex-row sm:items-center sm:justify-between lg:justify-start">
           <div>
             <p className="text-xs uppercase tracking-[0.3em] text-[color:var(--sage)]">
-              Trackza
+              Retail Omega
             </p>
             <h1 className="font-serif text-3xl text-[color:var(--ink)] sm:text-4xl">
               {title}
@@ -132,7 +132,7 @@ export default function AppShell({ title, subtitle, children }) {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-[11px] uppercase tracking-[0.35em] text-[color:var(--sage)]">
-                    Trackza
+                    Retail Omega
                   </p>
                 </div>
                 <button

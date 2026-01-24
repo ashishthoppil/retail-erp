@@ -49,7 +49,7 @@ export async function POST() {
 
     const { error } = await supabase.from("subscriptions").insert({
       user_id: user.id,
-      plan_name: "CasaStock Monthly",
+      plan_name: "Retail Omega Monthly",
       amount: 89,
       currency: "INR",
       status: "pending",

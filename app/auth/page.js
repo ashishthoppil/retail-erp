@@ -88,7 +88,7 @@ export default function AuthPage() {
       <Toast message={toast.message} visible={toast.visible} />
       <div className="mx-auto w-full max-w-lg rounded-[32px] border border-black/10 bg-white/90 p-8 shadow-[var(--shadow)] backdrop-blur">
         <p className="text-xs uppercase tracking-[0.35em] text-[color:var(--sage)]">
-          Trackza
+          Retail Omega
         </p>
         <h1 className="mt-3 font-serif text-3xl text-[color:var(--ink)]">
           {mode === "login" ? "Welcome back" : "Create your account"}
