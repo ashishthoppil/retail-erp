@@ -1,0 +1,228 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import Toast from "../components/Toast";
+import { getSupabaseBrowser } from "../lib/supabase-browser";
+
+const PLAN = {
+  name: "CasaStock Monthly",
+  amount: 49,
+  currency: "INR",
+  features: [
+    "Track batches, products, and live stock",
+    "Multi-item orders with address capture",
+    "Revenue + expense reports",
+    "Capital tracking and low-stock alerts",
+  ],
+};
+
+export default function PlanPage() {
+  const router = useRouter();
+  const supabase = useMemo(() => getSupabaseBrowser(), []);
+  const [subscription, setSubscription] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [paying, setPaying] = useState(false);
+  const [toast, setToast] = useState({ message: "", visible: false });
+
+  const showToast = (message) => {
+    setToast({ message, visible: true });
+    window.setTimeout(() => setToast({ message: "", visible: false }), 2400);
+  };
+
+  useEffect(() => {
+    async function loadSubscription() {
+      const response = await fetch("/api/subscription");
+      const json = await response.json();
+      if (response.ok) {
+        setSubscription(json.data);
+      }
+      setLoading(false);
+    }
+    loadSubscription();
+  }, []);
+
+  useEffect(() => {
+    const scriptId = "razorpay-checkout";
+    if (document.getElementById(scriptId)) return;
+    const script = document.createElement("script");
+    script.id = scriptId;
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    document.body.appendChild(script);
+  }, []);
+
+  const handlePay = async () => {
+    setPaying(true);
+    const response = await fetch("/api/razorpay/order", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+    });
+    const json = await response.json();
+    if (!response.ok) {
+      showToast(json.error || "Unable to start payment.");
+      setPaying(false);
+      return;
+    }
+
+    const { data } = await supabase.auth.getUser();
+    const options = {
+      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+      amount: json.amount,
+      currency: json.currency,
+      name: "CasaStock",
+      description: PLAN.name,
+      order_id: json.order_id,
+      prefill: { email: data.user?.email || "" },
+      handler: async (payload) => {
+        const verifyResponse = await fetch("/api/razorpay/verify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const verifyJson = await verifyResponse.json();
+        if (!verifyResponse.ok) {
+          showToast(verifyJson.error || "Payment verification failed.");
+          setPaying(false);
+          return;
+        }
+        showToast("Payment successful.");
+        router.push("/");
+      },
+      modal: {
+        ondismiss: () => setPaying(false),
+      },
+    };
+
+    const razorpay = new window.Razorpay(options);
+    razorpay.open();
+  };
+
+  const isActive = subscription?.status === "active";
+
+  return (
+    <div className="min-h-screen px-6 py-12 sm:px-10">
+      <Toast message={toast.message} visible={toast.visible} />
+      <div className="mx-auto w-full max-w-6xl">
+        <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-end">
+          <div>
+            <p className="text-xs uppercase tracking-[0.35em] text-[color:var(--sage)]">
+              Trackza
+            </p>
+            <h1 className="mt-3 font-serif text-4xl text-[color:var(--ink)]">
+              Pricing
+            </h1>
+            <p className="mt-2 text-sm text-black/60">
+              Unlock the workspace once your plan is active.
+            </p>
+          </div>
+          <p className="text-sm text-black/60">
+            {loading
+              ? "Checking your plan..."
+              : isActive
+                ? "Your plan is active."
+                : "Pay once to unlock all modules."}
+          </p>
+        </div>
+
+        <div className="mt-10 grid gap-6 lg:grid-cols-3">
+          <div className="rounded-[28px] border border-black/10 bg-white/80 p-6 shadow-sm">
+            <h2 className="font-serif text-2xl text-[color:var(--ink)]">
+              Starter
+            </h2>
+            <p className="mt-3 text-3xl font-semibold text-[color:var(--ink)]">
+              Rs 0
+              <span className="ml-1 text-sm font-normal text-black/50">
+                /trial
+              </span>
+            </p>
+            <p className="mt-3 text-sm text-black/60">
+              Preview the dashboard visuals before subscribing.
+            </p>
+            <button
+              type="button"
+              disabled
+              className="mt-6 w-full rounded-full border border-black/10 px-5 py-2 text-sm font-semibold text-black/40"
+            >
+              Current preview
+            </button>
+            <ul className="mt-6 space-y-3 text-sm text-black/60">
+              <li>Read-only dashboard preview</li>
+              <li>Sample inventory data</li>
+              <li>Limited access</li>
+            </ul>
+          </div>
+
+          <div className="relative rounded-[28px] border-2 border-[color:var(--ink)] bg-white p-6 shadow-[var(--shadow)]">
+            <span className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[color:var(--ink)] px-4 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-white">
+              Most Popular
+            </span>
+            <h2 className="font-serif text-2xl text-[color:var(--ink)]">
+              {PLAN.name}
+            </h2>
+            <p className="mt-3 text-3xl font-semibold text-[color:var(--ink)]">
+              Rs {PLAN.amount}
+              <span className="ml-1 text-sm font-normal text-black/50">
+                /month
+              </span>
+            </p>
+            <p className="mt-3 text-sm text-black/60">
+              Monthly plan billed every 30 days.
+            </p>
+            {isActive ? (
+              <button
+                type="button"
+                onClick={() => router.push("/")}
+                className="mt-6 w-full rounded-full bg-[color:var(--ink)] px-5 py-2 text-sm font-semibold text-white transition hover:bg-black"
+              >
+                Go to dashboard
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={handlePay}
+                disabled={paying || loading}
+                className="mt-6 w-full rounded-full bg-[color:var(--ink)] px-5 py-2 text-sm font-semibold text-white transition hover:bg-black disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                {paying ? "Processing..." : "Pay Rs 49"}
+              </button>
+            )}
+            <div className="mt-6 h-px bg-black/10" />
+            <ul className="mt-6 space-y-3 text-sm text-black/70">
+              {PLAN.features.map((feature) => (
+                <li key={feature}>{feature}</li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="rounded-[28px] border border-black/10 bg-white/80 p-6 shadow-sm">
+            <h2 className="font-serif text-2xl text-[color:var(--ink)]">
+              Premium
+            </h2>
+            <p className="mt-3 text-3xl font-semibold text-[color:var(--ink)]">
+              Rs 99
+              <span className="ml-1 text-sm font-normal text-black/50">
+                /month
+              </span>
+            </p>
+            <p className="mt-3 text-sm text-black/60">
+              Reserved for future add-ons.
+            </p>
+            <button
+              type="button"
+              disabled
+              className="mt-6 w-full rounded-full border border-black/10 px-5 py-2 text-sm font-semibold text-black/40"
+            >
+              Coming soon
+            </button>
+            <ul className="mt-6 space-y-3 text-sm text-black/60">
+              <li>Advanced analytics</li>
+              <li>Collaborator access</li>
+              <li>Priority support</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

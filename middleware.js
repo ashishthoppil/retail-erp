@@ -24,14 +24,32 @@ export async function middleware(request) {
   } = await supabase.auth.getUser();
 
   const pathname = request.nextUrl.pathname;
-  if (!user && pathname !== "/auth") {
+  const isAuthPage = pathname === "/auth";
+  const isPlanPage = pathname === "/plan";
+  const isWebhook = pathname === "/api/razorpay/webhook";
+  if (!user && !isAuthPage) {
     const redirectUrl = new URL("/auth", request.url);
     return NextResponse.redirect(redirectUrl);
   }
 
-  if (user && pathname === "/auth") {
+  if (user && isAuthPage) {
     const redirectUrl = new URL("/", request.url);
     return NextResponse.redirect(redirectUrl);
+  }
+
+  if (user && !isPlanPage && !isWebhook && pathname !== "/api/razorpay/order") {
+    const { data: subscription } = await supabase
+      .from("subscriptions")
+      .select("status")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .single();
+
+    if (!subscription || subscription.status !== "active") {
+      const redirectUrl = new URL("/plan", request.url);
+      return NextResponse.redirect(redirectUrl);
+    }
   }
 
   return response;

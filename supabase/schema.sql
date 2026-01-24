@@ -53,12 +53,34 @@ create table if not exists public.expenses (
   created_at timestamptz not null default now()
 );
 
+create table if not exists public.profiles (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  business_name text,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists public.subscriptions (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  plan_name text not null,
+  amount numeric(12, 2) not null,
+  currency text not null default 'INR',
+  status text not null default 'pending',
+  razorpay_order_id text,
+  razorpay_payment_id text,
+  razorpay_signature text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
 alter table public.batches enable row level security;
 alter table public.products enable row level security;
 alter table public.orders enable row level security;
 alter table public.capital enable row level security;
 alter table public.expenses enable row level security;
 alter table public.order_items enable row level security;
+alter table public.profiles enable row level security;
+alter table public.subscriptions enable row level security;
 
 create policy "Batches are user-scoped"
   on public.batches
@@ -92,6 +114,18 @@ create policy "Capital is user-scoped"
 
 create policy "Expenses are user-scoped"
   on public.expenses
+  for all
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
+create policy "Profiles are user-scoped"
+  on public.profiles
+  for all
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
+create policy "Subscriptions are user-scoped"
+  on public.subscriptions
   for all
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);

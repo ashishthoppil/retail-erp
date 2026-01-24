@@ -45,8 +45,10 @@ export default function AuthPage() {
         return;
       }
 
+      let userId = data?.user?.id;
       if (!data?.session) {
-        const { error: signInError } = await supabase.auth.signInWithPassword({
+        const { data: signInData, error: signInError } =
+          await supabase.auth.signInWithPassword({
           email,
           password,
         });
@@ -56,10 +58,17 @@ export default function AuthPage() {
           setLoading(false);
           return;
         }
+        userId = signInData?.user?.id;
+      }
+
+      if (userId) {
+        await supabase
+          .from("profiles")
+          .upsert({ user_id: userId, business_name: businessName });
       }
 
       showToast("Registration successful.");
-      window.setTimeout(() => router.push("/"), 900);
+      window.setTimeout(() => router.push("/plan"), 900);
     } else {
       const { error } = await supabase.auth.signInWithPassword(payload);
       if (error) {
@@ -69,7 +78,7 @@ export default function AuthPage() {
         return;
       }
       showToast("Login successful.");
-      window.setTimeout(() => router.push("/"), 900);
+      window.setTimeout(() => router.push("/plan"), 900);
     }
     setLoading(false);
   }
