@@ -28,13 +28,13 @@ export async function POST(request) {
 
     const payload = JSON.parse(rawBody);
     console.log('payload.event: ', payload.event)
-    console.log('payload: ', payload)
+    console.log('payload: ', payload.payload?.subscription?.entity?.id)
 
-    if (payload.event !== "payment.captured") {
+    if (payload.event !== "subscription.captured") {
       return NextResponse.json({ received: true });
     }
 
-    const subscriptionId = payload.payload?.payment?.entity?.subscription_id;
+    const subscriptionId = payload.payload?.subscription?.entity?.id;
     const paymentId = payload.payload?.payment?.entity?.id;
 
     if (!subscriptionId) {
