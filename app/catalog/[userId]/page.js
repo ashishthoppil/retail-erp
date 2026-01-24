@@ -1,15 +1,18 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 
-export default function CatalogPage({ params }) {
-  const { userId } = params;
+export default function CatalogPage() {
+  const params = useParams();
+  const userId = params?.userId;
   const [catalog, setCatalog] = useState({ business_name: "", products: [] });
   const [selected, setSelected] = useState(null);
   const [status, setStatus] = useState("");
 
   useEffect(() => {
     async function loadCatalog() {
+      if (!userId) return;
       const response = await fetch(`/api/catalog/${userId}`);
       const json = await response.json();
       if (!response.ok) {
