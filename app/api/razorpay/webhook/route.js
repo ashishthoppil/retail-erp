@@ -5,6 +5,7 @@ import { createClient } from "@supabase/supabase-js";
 export async function POST(request) {
   try {
     const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
+    console.log('secret: ', secret)
     if (!secret) {
       return NextResponse.json(
         { error: "Missing webhook secret." },
@@ -27,6 +28,9 @@ export async function POST(request) {
     }
 
     const payload = JSON.parse(rawBody);
+    console.log('payload: ', payload)
+    console.log('payload.event: ', payload.event)
+
     if (payload.event !== "payment.captured") {
       return NextResponse.json({ received: true });
     }
