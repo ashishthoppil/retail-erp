@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-export async function GET(request, { params }) {
+export async function GET(request) {
   try {
-    const { userId } = params;
+    const { searchParams } = new URL(request.url);
+    const userId = searchParams.get("user_id");
     if (!userId) {
       return NextResponse.json({ error: "Missing user id." }, { status: 400 });
     }

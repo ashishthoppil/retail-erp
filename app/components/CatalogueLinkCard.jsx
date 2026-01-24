@@ -24,7 +24,7 @@ export default function CatalogueLinkCard() {
 
   const link =
     typeof window !== "undefined" && userId
-      ? `${window.location.origin}/catalog/${userId}`
+      ? `${window.location.origin}/catalog?user_id=${userId}`
       : "";
 
   async function handleCopy() {
