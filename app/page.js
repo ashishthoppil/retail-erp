@@ -2,6 +2,7 @@ import Link from "next/link";
 import AppShell from "./components/AppShell";
 import CapitalCard from "./components/CapitalCard";
 import StockReminder from "./components/StockReminder";
+import CatalogueLinkCard from "./components/CatalogueLinkCard";
 
 export default function Home() {
   return (
@@ -11,6 +12,7 @@ export default function Home() {
     >
       <section className="space-y-6">
         <CapitalCard />
+        <CatalogueLinkCard />
         <StockReminder />
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {[

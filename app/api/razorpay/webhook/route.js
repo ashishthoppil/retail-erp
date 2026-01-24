@@ -27,10 +27,8 @@ export async function POST(request) {
     }
 
     const payload = JSON.parse(rawBody);
-    console.log('payload.event: ', payload.event)
-    console.log('payload: ', payload.payload?.subscription?.entity?.id)
 
-    if (payload.event !== "subscription.captured") {
+    if (payload.event !== "subscription.charged") {
       return NextResponse.json({ received: true });
     }
 
