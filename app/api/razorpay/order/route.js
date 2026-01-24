@@ -30,7 +30,8 @@ export async function POST() {
     const expireBy = startAt + 30 * 24 * 60 * 60;
 
     const subscription = await razorpay.subscriptions.create({
-      "plan_id": "plan_S7eo9kC5B9U1Xf",
+      // "plan_id": "plan_S7eo9kC5B9U1Xf",
+      "plan_id": "plan_S7mm8kacz6KeM4",
       "total_count": 12,
       "customer_notify": 1,
     })
