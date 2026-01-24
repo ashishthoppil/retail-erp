@@ -26,25 +26,13 @@ export async function POST() {
       key_secret: keySecret,
     });
 
-    const amount = 4900;
-    // const order = await razorpay.orders.create({
-    //   amount,
-    //   currency: "INR",
-    //   receipt: `plan_${user.id}_${Date.now()}`,
-    //   notes: { user_id: user.id },
-    // });
-
     const startAt = Math.floor(Date.now() / 1000);
     const expireBy = startAt + 30 * 24 * 60 * 60;
 
-    const order = await razorpay.subscriptions.create({
-      "plan_id":"plan_S70QmWUWK7evJn",
-      "total_count":1,
-      "quantity": 1,
-      "customer_notify": false,
-      "start_at": startAt,
-      "expire_by": expireBy,
-      "notes": { user_id: user.id }
+    const subscription = await razorpay.subscriptions.create({
+      "plan_id": "plan_S7eo9kC5B9U1Xf",
+      "total_count": 12,
+      "customer_notify": 1,
     })
 
     const { error } = await supabase.from("subscriptions").insert({
@@ -53,15 +41,13 @@ export async function POST() {
       amount: 89,
       currency: "INR",
       status: "pending",
-      razorpay_order_id: order.id,
+      razorpay_subscription_id: subscription.id,
     });
 
     if (error) throw error;
-
     return NextResponse.json({
-      order_id: order.id,
-      amount: order.amount,
-      currency: order.currency,
+      subscription_id: subscription.id,
+      url: subscription.short_url
     });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });

@@ -13,11 +13,11 @@ export async function POST(request) {
     }
 
     const body = await request.json();
-    const orderId = body?.razorpay_order_id;
+    const subscriptionId = body?.razorpay_subscription_id;
     const paymentId = body?.razorpay_payment_id;
     const signature = body?.razorpay_signature;
 
-    if (!orderId || !paymentId || !signature) {
+    if (!subscriptionId || !paymentId || !signature) {
       return NextResponse.json(
         { error: "Missing payment verification payload." },
         { status: 400 }
@@ -34,7 +34,7 @@ export async function POST(request) {
 
     const expected = crypto
       .createHmac("sha256", secret)
-      .update(`${orderId}|${paymentId}`)
+      .update(`${subscriptionId}|${paymentId}`)
       .digest("hex");
 
     if (expected !== signature) {
@@ -52,7 +52,7 @@ export async function POST(request) {
         razorpay_signature: signature,
         updated_at: new Date().toISOString(),
       })
-      .eq("razorpay_order_id", orderId)
+      .eq("razorpay_subscription_id", subscriptionId)
       .eq("user_id", user.id);
 
     if (error) throw error;

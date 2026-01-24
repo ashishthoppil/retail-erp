@@ -67,6 +67,7 @@ create table if not exists public.subscriptions (
   currency text not null default 'INR',
   status text not null default 'pending',
   razorpay_order_id text,
+  razorpay_subscription_id text,
   razorpay_payment_id text,
   razorpay_signature text,
   created_at timestamptz not null default now(),

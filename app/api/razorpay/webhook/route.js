@@ -31,12 +31,12 @@ export async function POST(request) {
       return NextResponse.json({ received: true });
     }
 
-    const orderId = payload.payload?.payment?.entity?.order_id;
+    const subscriptionId = payload.payload?.payment?.entity?.subscription_id;
     const paymentId = payload.payload?.payment?.entity?.id;
 
-    if (!orderId) {
+    if (!subscriptionId) {
       return NextResponse.json(
-        { error: "Missing order id." },
+        { error: "Missing subscription id." },
         { status: 400 }
       );
     }
@@ -61,7 +61,7 @@ export async function POST(request) {
         razorpay_payment_id: paymentId,
         updated_at: new Date().toISOString(),
       })
-      .eq("razorpay_order_id", orderId);
+      .eq("razorpay_subscription_id", subscriptionId);
 
     if (error) throw error;
 

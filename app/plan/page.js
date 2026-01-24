@@ -7,7 +7,7 @@ import { getSupabaseBrowser } from "../lib/supabase-browser";
 
 const PLAN = {
   name: "Retail Omega Monthly",
-  amount: 49,
+  amount: 89,
   currency: "INR",
   features: [
     "Track batches, products, and live stock",
@@ -63,39 +63,41 @@ export default function PlanPage() {
       showToast(json.error || "Unable to start payment.");
       setPaying(false);
       return;
+    } else {
+      window.open(json.url);
     }
 
-    const { data } = await supabase.auth.getUser();
-    const options = {
-      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-      amount: json.amount,
-      currency: json.currency,
-      name: "Retail Omega",
-      description: PLAN.name,
-      order_id: json.order_id,
-      prefill: { email: data.user?.email || "" },
-      handler: async (payload) => {
-        const verifyResponse = await fetch("/api/razorpay/verify", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-        const verifyJson = await verifyResponse.json();
-        if (!verifyResponse.ok) {
-          showToast(verifyJson.error || "Payment verification failed.");
-          setPaying(false);
-          return;
-        }
-        showToast("Payment successful.");
-        router.push("/");
-      },
-      modal: {
-        ondismiss: () => setPaying(false),
-      },
-    };
+    // const { data } = await supabase.auth.getUser();
+    // const options = {
+    //   key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+    //   amount: json.amount,
+    //   currency: json.currency,
+    //   name: "Retail Omega",
+    //   description: PLAN.name,
+    //   subscription_id: json.subscription_id,
+    //   prefill: { email: data.user?.email || "" },
+    //   handler: async (payload) => {
+    //     const verifyResponse = await fetch("/api/razorpay/verify", {
+    //       method: "POST",
+    //       headers: { "Content-Type": "application/json" },
+    //       body: JSON.stringify(payload),
+    //     });
+    //     const verifyJson = await verifyResponse.json();
+    //     if (!verifyResponse.ok) {
+    //       showToast(verifyJson.error || "Payment verification failed.");
+    //       setPaying(false);
+    //       return;
+    //     }
+    //     showToast("Payment successful.");
+    //     router.push("/");
+    //   },
+    //   modal: {
+    //     ondismiss: () => setPaying(false),
+    //   },
+    // };
 
-    const razorpay = new window.Razorpay(options);
-    razorpay.open();
+    // const razorpay = new window.Razorpay(options);
+    // razorpay.open();
   };
 
   const isActive = subscription?.status === "active";
@@ -184,7 +186,7 @@ export default function PlanPage() {
                 disabled={paying || loading}
                 className="mt-6 w-full rounded-full bg-[color:var(--ink)] px-5 py-2 text-sm font-semibold text-white transition hover:bg-black disabled:cursor-not-allowed disabled:opacity-70"
               >
-                {paying ? "Processing..." : "Pay Rs 49"}
+                {paying ? "Processing..." : "Pay Rs 89"}
               </button>
             )}
             <div className="mt-6 h-px bg-black/10" />
