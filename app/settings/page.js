@@ -105,9 +105,9 @@ export default function SettingsPage() {
     );
 
     if (error) {
-      showToast(error.message || "Unable to update business name.");
+      showToast(error.message || "Unable to update settings.");
     } else {
-      showToast("Business name updated.");
+      showToast("Settings updated.");
     }
     setSaving(false);
   };

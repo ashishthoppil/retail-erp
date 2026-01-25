@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Toast from "../components/Toast";
 import { getSupabaseBrowser } from "../lib/supabase-browser";
@@ -23,7 +23,9 @@ export default function PlanPage() {
   const [subscription, setSubscription] = useState(null);
   const [loading, setLoading] = useState(true);
   const [paying, setPaying] = useState(false);
+  const [pollingPayment, setPollingPayment] = useState(false);
   const [toast, setToast] = useState({ message: "", visible: false });
+  const pollRef = useRef(null);
 
   const showToast = (message) => {
     setToast({ message, visible: true });
@@ -31,15 +33,23 @@ export default function PlanPage() {
   };
 
   useEffect(() => {
+    let mounted = true;
+
     async function loadSubscription() {
       const response = await fetch("/api/subscription");
       const json = await response.json();
+      if (!mounted) return;
       if (response.ok) {
         setSubscription(json.data);
       }
       setLoading(false);
     }
+
     loadSubscription();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -51,6 +61,36 @@ export default function PlanPage() {
     script.async = true;
     document.body.appendChild(script);
   }, []);
+
+  useEffect(() => {
+    if (!pollingPayment) return;
+
+    const pollSubscription = async () => {
+      try {
+        const response = await fetch("/api/subscription");
+        const json = await response.json();
+        if (response.ok) {
+          setSubscription(json.data);
+          if (json.data?.status === "active") {
+            setPollingPayment(false);
+            setPaying(false);
+            router.push("/dashboard");
+          }
+        }
+      } catch (error) {
+        showToast("Unable to refresh payment status.");
+      }
+    };
+
+    pollSubscription();
+    pollRef.current = window.setInterval(pollSubscription, 4000);
+
+    return () => {
+      if (pollRef.current) {
+        window.clearInterval(pollRef.current);
+      }
+    };
+  }, [pollingPayment, router]);
 
   const handlePay = async () => {
     setPaying(true);
@@ -65,6 +105,7 @@ export default function PlanPage() {
       return;
     } else {
       window.open(json.url);
+      setPollingPayment(true);
     }
 
     // const { data } = await supabase.auth.getUser();
