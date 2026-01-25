@@ -3,7 +3,16 @@
 import { useEffect, useState } from "react";
 
 export default function CatalogClient({ userId }) {
-  const [catalog, setCatalog] = useState({ business_name: "", products: [] });
+  const [catalog, setCatalog] = useState({
+    business_name: "",
+    instagram_url: null,
+    facebook_url: null,
+    website_url: null,
+    phone_number: null,
+    show_catalog_price: true,
+    show_catalog_description: true,
+    products: [],
+  });
   const [selected, setSelected] = useState(null);
   const [status, setStatus] = useState("");
 
@@ -33,6 +42,48 @@ export default function CatalogClient({ userId }) {
         <p className="mt-2 text-sm text-black/60">
           Browse the latest pieces available for order.
         </p>
+        {(catalog.instagram_url ||
+          catalog.facebook_url ||
+          catalog.website_url ||
+          catalog.phone_number) ? (
+          <div className="mt-4 flex flex-wrap gap-3 text-sm text-black/60">
+            {catalog.phone_number ? (
+              <span className="rounded-full border border-black/10 bg-white px-3 py-1">
+                {catalog.phone_number}
+              </span>
+            ) : null}
+            {catalog.website_url ? (
+              <a
+                href={catalog.website_url}
+                target="_blank"
+                rel="noreferrer"
+                className="rounded-full border border-black/10 bg-white px-3 py-1 transition hover:border-transparent hover:bg-[color:var(--clay)]"
+              >
+                Website
+              </a>
+            ) : null}
+            {catalog.instagram_url ? (
+              <a
+                href={catalog.instagram_url}
+                target="_blank"
+                rel="noreferrer"
+                className="rounded-full border border-black/10 bg-white px-3 py-1 transition hover:border-transparent hover:bg-[color:var(--clay)]"
+              >
+                Instagram
+              </a>
+            ) : null}
+            {catalog.facebook_url ? (
+              <a
+                href={catalog.facebook_url}
+                target="_blank"
+                rel="noreferrer"
+                className="rounded-full border border-black/10 bg-white px-3 py-1 transition hover:border-transparent hover:bg-[color:var(--clay)]"
+              >
+                Facebook
+              </a>
+            ) : null}
+          </div>
+        ) : null}
         {status ? (
           <p className="mt-4 text-sm text-[color:var(--copper)]">{status}</p>
         ) : null}
@@ -60,11 +111,17 @@ export default function CatalogClient({ userId }) {
                 {product.name}
               </h2>
               <p className="mt-2 text-sm text-black/60">
-                Tap to view details.
+                {catalog.show_catalog_description
+                  ? product.description?.trim()
+                    ? product.description
+                    : "Tap to view details."
+                  : "Tap to view details."}
               </p>
-              <p className="mt-4 text-lg font-semibold text-[color:var(--ink)]">
-                Rs {product.selling_price}
-              </p>
+              {catalog.show_catalog_price ? (
+                <p className="mt-4 text-lg font-semibold text-[color:var(--ink)]">
+                  Rs {product.selling_price}
+                </p>
+              ) : null}
             </div>
           </button>
         ))}
@@ -99,16 +156,28 @@ export default function CatalogClient({ userId }) {
                 />
               </div>
             ) : null}
-            <div className="mt-4 rounded-2xl border border-black/10 bg-white/80 px-4 py-3">
-              <p className="text-xs uppercase tracking-[0.2em] text-black/50">
-                Price
-              </p>
-              <p className="mt-2 text-lg font-semibold text-[color:var(--ink)]">
-                Rs {selected.selling_price}
-              </p>
-            </div>
+            {catalog.show_catalog_price ? (
+              <div className="mt-4 rounded-2xl border border-black/10 bg-white/80 px-4 py-3">
+                <p className="text-xs uppercase tracking-[0.2em] text-black/50">
+                  Price
+                </p>
+                <p className="mt-2 text-lg font-semibold text-[color:var(--ink)]">
+                  Rs {selected.selling_price}
+                </p>
+              </div>
+            ) : null}
+            {catalog.show_catalog_description && selected.description?.trim() ? (
+              <div className="mt-4 rounded-2xl border border-black/10 bg-white/80 px-4 py-3">
+                <p className="text-xs uppercase tracking-[0.2em] text-black/50">
+                  Description
+                </p>
+                <p className="mt-2 text-sm text-black/70">
+                  {selected.description}
+                </p>
+              </div>
+            ) : null}
             <p className="mt-4 text-sm text-black/60">
-              Contact the studio to place an order.
+              Contact the business to place an order.
             </p>
           </div>
         </div>

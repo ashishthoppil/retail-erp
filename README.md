@@ -1,6 +1,6 @@
 # Retail Omega
 
-A responsive stock management tool built for a home decor studio. Track batches, products, orders, and revenue trends in one place.
+A responsive stock management tool built for a small businesses. Track batches, products, orders, and revenue trends in one place.
 
 ## Supabase setup
 

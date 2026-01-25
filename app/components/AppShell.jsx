@@ -5,14 +5,15 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { getSupabaseBrowser } from "../lib/supabase-browser";
 import Toast from "./Toast";
-import { ChartNoAxesCombinedIcon, HandCoinsIcon, Home, HomeIcon, LogOutIcon, MenuIcon, Package, ShoppingBasketIcon, X } from "lucide-react";
+import { ChartNoAxesCombinedIcon, HandCoinsIcon, Home, LogOutIcon, MenuIcon, Package, Settings, ShoppingBasketIcon, X } from "lucide-react";
 
 const navLinks = [
-  { href: "/", label: "Home", icon: Home },
+  { href: "/dashboard", label: "Dashboard", icon: Home },
   { href: "/add-stock", label: "Inventory", icon: ShoppingBasketIcon },
   { href: "/place-order", label: "Orders", icon: Package },
   { href: "/reports", label: "Reports", icon: ChartNoAxesCombinedIcon },
   { href: "/expenses", label: "Expenses", icon: HandCoinsIcon },
+  { href: "/settings", label: "Settings", icon: Settings },
 ];
 
 export default function AppShell({ title, subtitle, children }) {
@@ -84,13 +85,22 @@ export default function AppShell({ title, subtitle, children }) {
               {title}
             </h1>
           </div>
-          <button
-            type="button"
-            onClick={() => setIsNavOpen(true)}
-            className="rounded-full border border-black/10 bg-white px-4 py-2 text-xs uppercase tracking-[0.25em] text-black"
-          >
-            <MenuIcon />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="rounded-full border border-black/10 bg-white px-4 py-2 text-xs uppercase tracking-[0.25em] text-black"
+            >
+              <LogOutIcon className="h-4" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsNavOpen(true)}
+              className="rounded-full border border-black/10 bg-white px-4 py-2 text-xs uppercase tracking-[0.25em] text-black"
+            >
+              <MenuIcon />
+            </button>
+          </div>
         </div>
 
         <div className="hidden flex-col gap-4 rounded-3xl border border-black/10 bg-white/80 p-6 shadow-[var(--shadow)] backdrop-blur sm:flex sm:flex-row sm:items-center sm:justify-between lg:justify-start">
@@ -106,6 +116,15 @@ export default function AppShell({ title, subtitle, children }) {
                 {subtitle}
               </p>
             ) : null}
+          </div>
+          <div className="ml-auto flex items-center gap-3">
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="rounded-full border border-black/10 bg-white px-4 py-2 text-xs uppercase tracking-[0.2em] text-black/70 transition hover:border-transparent hover:bg-[color:var(--clay)]"
+            >
+              Logout
+            </button>
           </div>
         </div>
           </header>

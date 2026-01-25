@@ -144,7 +144,7 @@ export default function ReportsClient() {
           },
           {
             key: "wholesale",
-            label: "Total Bought",
+            label: "Expense on Products",
             value: totals.wholesale,
             note: "All time",
           },

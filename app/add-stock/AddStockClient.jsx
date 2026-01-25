@@ -7,6 +7,7 @@ const emptyProduct = {
   batch_id: "",
   image_url: "",
   name: "",
+  description: "",
   buying_price: "",
   selling_price: "",
   quantity: "",
@@ -220,6 +221,7 @@ export default function AddStockClient() {
       batch_id: item.batch_id || "",
       image_url: item.image_url || "",
       name: item.name || "",
+      description: item.description || "",
       buying_price: item.buying_price ?? "",
       selling_price: item.selling_price ?? "",
       current_quantity: item.current_quantity ?? "",
@@ -554,9 +556,26 @@ export default function AddStockClient() {
                 required
               />
             </div>
+            <div className="flex flex-col gap-2 md:col-span-2">
+              <label className="text-xs uppercase tracking-[0.2em] text-black/50">
+                Description
+              </label>
+              <textarea
+                value={product.description}
+                onChange={(event) =>
+                  setProduct((prev) => ({
+                    ...prev,
+                    description: event.target.value,
+                  }))
+                }
+                placeholder="Short description for the catalog."
+                rows={3}
+                className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm focus:border-[color:var(--sage)] focus:outline-none"
+              />
+            </div>
             <div className="flex flex-col gap-2">
               <label className="text-xs uppercase tracking-[0.2em] text-black/50">
-                Buying price
+                Buying price (per piece)
               </label>
               <input
                 value={product.buying_price}
@@ -575,7 +594,7 @@ export default function AddStockClient() {
             </div>
             <div className="flex flex-col gap-2">
               <label className="text-xs uppercase tracking-[0.2em] text-black/50">
-                Selling price
+                Selling price (per piece)
               </label>
               <input
                 value={product.selling_price}
@@ -710,6 +729,24 @@ export default function AddStockClient() {
                               {item.name}
                             </p>
                           )}
+                          {isEditing ? (
+                            <textarea
+                              value={editingProduct?.description || ""}
+                              onChange={(event) =>
+                                setEditingProduct((prev) => ({
+                                  ...prev,
+                                  description: event.target.value,
+                                }))
+                              }
+                              rows={2}
+                              placeholder="Description"
+                              className="mt-2 w-full rounded-xl border border-black/10 px-3 py-2 text-xs focus:border-[color:var(--sage)] focus:outline-none"
+                            />
+                          ) : item.description ? (
+                            <p className="mt-1 text-xs text-black/50">
+                              {item.description}
+                            </p>
+                          ) : null}
                           {isEditing ? (
                             <input
                               type="file"

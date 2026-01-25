@@ -26,24 +26,59 @@ export async function POST() {
       key_secret: keySecret,
     });
 
-    const startAt = Math.floor(Date.now() / 1000);
-    const expireBy = startAt + 30 * 24 * 60 * 60;
+    const { data: existingSubscription, error: existingError } = await supabase
+      .from("subscriptions")
+      .select("id,status,razorpay_subscription_id")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (existingError) throw existingError;
+
+    if (existingSubscription?.status === "active") {
+      return NextResponse.json(
+        { error: "Subscription already active." },
+        { status: 409 }
+      );
+    }
+
+    if (
+      existingSubscription?.status === "pending" &&
+      existingSubscription?.razorpay_subscription_id
+    ) {
+      const existingRazorpay = await razorpay.subscriptions.fetch(
+        existingSubscription.razorpay_subscription_id
+      );
+      return NextResponse.json({
+        subscription_id: existingRazorpay.id,
+        url: existingRazorpay.short_url,
+      });
+    }
+      console.log('existingSubscription');
 
     const subscription = await razorpay.subscriptions.create({
       // "plan_id": "plan_S7eo9kC5B9U1Xf",
       "plan_id": "plan_S7mm8kacz6KeM4",
       "total_count": 12,
       "customer_notify": 1,
-    })
+    });
 
-    const { error } = await supabase.from("subscriptions").insert({
+    const subscriptionPayload = {
       user_id: user.id,
       plan_name: "Retail Omega Monthly",
       amount: 89,
       currency: "INR",
       status: "pending",
       razorpay_subscription_id: subscription.id,
-    });
+    };
+
+    const { error } = existingSubscription?.id
+      ? await supabase
+          .from("subscriptions")
+          .update(subscriptionPayload)
+          .eq("id", existingSubscription.id)
+      : await supabase.from("subscriptions").insert(subscriptionPayload);
 
     if (error) throw error;
     return NextResponse.json({

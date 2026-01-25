@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Toast from "./Toast";
 import { getSupabaseBrowser } from "../lib/supabase-browser";
+import { CopyIcon } from "lucide-react";
 
 export default function CatalogueLinkCard() {
   const supabase = useMemo(() => getSupabaseBrowser(), []);
@@ -53,8 +54,9 @@ export default function CatalogueLinkCard() {
             type="button"
             onClick={handleCopy}
             disabled={!link}
-            className="rounded-full bg-[color:var(--ink)] px-5 py-2 text-sm font-semibold text-white transition hover:bg-black disabled:cursor-not-allowed disabled:opacity-70"
+            className="flex gap-1 items-center rounded-full bg-[color:var(--ink)] px-5 py-2 text-sm font-semibold text-white transition hover:bg-black disabled:cursor-not-allowed disabled:opacity-70"
           >
+            <CopyIcon className="h-4" />
             Copy catalogue link
           </button>
         </div>

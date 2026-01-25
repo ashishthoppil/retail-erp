@@ -28,7 +28,8 @@ export async function POST(request) {
 
     const payload = JSON.parse(rawBody);
 
-    if (payload.event !== "subscription.charged") {
+    const event = payload.event;
+    if (!event) {
       return NextResponse.json({ received: true });
     }
 
@@ -55,13 +56,30 @@ export async function POST(request) {
       auth: { persistSession: false },
     });
 
-    const { error } = await supabase
-      .from("subscriptions")
-      .update({
+    let updatePayload = null;
+
+    if (event === "subscription.charged") {
+      updatePayload = {
         status: "active",
         razorpay_payment_id: paymentId,
         updated_at: new Date().toISOString(),
-      })
+      };
+    }
+
+    if (event === "subscription.cancelled") {
+      updatePayload = {
+        status: "cancelled",
+        updated_at: new Date().toISOString(),
+      };
+    }
+
+    if (!updatePayload) {
+      return NextResponse.json({ received: true });
+    }
+
+    const { error } = await supabase
+      .from("subscriptions")
+      .update(updatePayload)
       .eq("razorpay_subscription_id", subscriptionId);
 
     if (error) throw error;

@@ -29,7 +29,8 @@ export async function middleware(request) {
   const isWebhook = pathname === "/api/razorpay/webhook";
   const isCatalog = pathname.startsWith("/catalog");
   const isCatalogApi = pathname.startsWith("/api/catalog");
-  if (!user && !isAuthPage && !isCatalog && !isCatalogApi) {
+  const isLanding = pathname === "/";
+  if (!user && !isAuthPage && !isCatalog && !isCatalogApi && !isLanding) {
     const redirectUrl = new URL("/auth", request.url);
     return NextResponse.redirect(redirectUrl);
   }
@@ -56,7 +57,16 @@ export async function middleware(request) {
       .single();
 
     if (!subscription || subscription.status !== "active") {
+      if (isLanding) {
+        const redirectUrl = new URL("/plan", request.url);
+        return NextResponse.redirect(redirectUrl);
+      }
       const redirectUrl = new URL("/plan", request.url);
+      return NextResponse.redirect(redirectUrl);
+    }
+
+    if (isLanding) {
+      const redirectUrl = new URL("/dashboard", request.url);
       return NextResponse.redirect(redirectUrl);
     }
   }
@@ -65,5 +75,5 @@ export async function middleware(request) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|api).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|api|images).*)"],
 };

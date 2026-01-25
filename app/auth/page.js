@@ -78,7 +78,7 @@ export default function AuthPage() {
         return;
       }
       showToast("Login successful.");
-      window.setTimeout(() => router.push("/plan"), 900);
+      window.setTimeout(() => router.push("/"), 900);
     }
     setLoading(false);
   }

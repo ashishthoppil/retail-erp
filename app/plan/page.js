@@ -101,6 +101,11 @@ export default function PlanPage() {
   };
 
   const isActive = subscription?.status === "active";
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    showToast("Logged out.");
+    router.push("/auth");
+  };
 
   return (
     <div className="min-h-screen px-6 py-12 sm:px-10">
@@ -118,47 +123,26 @@ export default function PlanPage() {
               Unlock the workspace once your plan is active.
             </p>
           </div>
-          <p className="text-sm text-black/60">
-            {loading
-              ? "Checking your plan..."
-              : isActive
-                ? "Your plan is active."
-                : "Pay once to unlock all modules."}
-          </p>
-        </div>
-
-        <div className="mt-10 grid gap-6 lg:grid-cols-3">
-          <div className="rounded-[28px] border border-black/10 bg-white/80 p-6 shadow-sm">
-            <h2 className="font-serif text-2xl text-[color:var(--ink)]">
-              Starter
-            </h2>
-            <p className="mt-3 text-3xl font-semibold text-[color:var(--ink)]">
-              Rs 0
-              <span className="ml-1 text-sm font-normal text-black/50">
-                /trial
-              </span>
-            </p>
-            <p className="mt-3 text-sm text-black/60">
-              Preview the dashboard visuals before subscribing.
+          <div className="flex flex-wrap items-center gap-3">
+            <p className="text-sm text-black/60">
+              {loading
+                ? "Checking your plan..."
+                : isActive
+                  ? "Your plan is active."
+                  : "Pay once to unlock all modules."}
             </p>
             <button
               type="button"
-              disabled
-              className="mt-6 w-full rounded-full border border-black/10 px-5 py-2 text-sm font-semibold text-black/40"
+              onClick={handleLogout}
+              className="rounded-full hover:cursor-pointer border border-black/10 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-black/70 transition hover:border-transparent hover:bg-[color:var(--clay)]"
             >
-              Current preview
+              Logout
             </button>
-            <ul className="mt-6 space-y-3 text-sm text-black/60">
-              <li>Read-only dashboard preview</li>
-              <li>Sample inventory data</li>
-              <li>Limited access</li>
-            </ul>
           </div>
+        </div>
 
-          <div className="relative rounded-[28px] border-2 border-[color:var(--ink)] bg-white p-6 shadow-[var(--shadow)]">
-            <span className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[color:var(--ink)] px-4 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-white">
-              Most Popular
-            </span>
+        <div className="mt-10 flex justify-center">
+          <div className="relative w-full max-w-xl rounded-[28px] border-2 border-[color:var(--ink)] bg-white p-6 shadow-[var(--shadow)]">
             <h2 className="font-serif text-2xl text-[color:var(--ink)]">
               {PLAN.name}
             </h2>
@@ -174,7 +158,7 @@ export default function PlanPage() {
             {isActive ? (
               <button
                 type="button"
-                onClick={() => router.push("/")}
+                onClick={() => router.push("/dashboard")}
                 className="mt-6 w-full rounded-full bg-[color:var(--ink)] px-5 py-2 text-sm font-semibold text-white transition hover:bg-black"
               >
                 Go to dashboard
@@ -194,33 +178,6 @@ export default function PlanPage() {
               {PLAN.features.map((feature) => (
                 <li key={feature}>{feature}</li>
               ))}
-            </ul>
-          </div>
-
-          <div className="rounded-[28px] border border-black/10 bg-white/80 p-6 shadow-sm">
-            <h2 className="font-serif text-2xl text-[color:var(--ink)]">
-              Premium
-            </h2>
-            <p className="mt-3 text-3xl font-semibold text-[color:var(--ink)]">
-              Rs 99
-              <span className="ml-1 text-sm font-normal text-black/50">
-                /month
-              </span>
-            </p>
-            <p className="mt-3 text-sm text-black/60">
-              Reserved for future add-ons.
-            </p>
-            <button
-              type="button"
-              disabled
-              className="mt-6 w-full rounded-full border border-black/10 px-5 py-2 text-sm font-semibold text-black/40"
-            >
-              Coming soon
-            </button>
-            <ul className="mt-6 space-y-3 text-sm text-black/60">
-              <li>Advanced analytics</li>
-              <li>Collaborator access</li>
-              <li>Priority support</li>
             </ul>
           </div>
         </div>

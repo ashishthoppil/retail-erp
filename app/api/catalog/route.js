@@ -24,7 +24,9 @@ export async function GET(request) {
 
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
-      .select("business_name")
+      .select(
+        "business_name, instagram_url, facebook_url, website_url, phone_number, show_catalog_price, show_catalog_description"
+      )
       .eq("user_id", userId)
       .single();
 
@@ -34,7 +36,7 @@ export async function GET(request) {
 
     const { data: products, error: productsError } = await supabase
       .from("products")
-      .select("id, name, image_url, selling_price")
+      .select("id, name, image_url, selling_price, description")
       .eq("user_id", userId)
       .order("created_at", { ascending: false });
 
@@ -43,6 +45,12 @@ export async function GET(request) {
     return NextResponse.json({
       data: {
         business_name: profile?.business_name || "Catalog",
+        instagram_url: profile?.instagram_url || null,
+        facebook_url: profile?.facebook_url || null,
+        website_url: profile?.website_url || null,
+        phone_number: profile?.phone_number || null,
+        show_catalog_price: profile?.show_catalog_price ?? true,
+        show_catalog_description: profile?.show_catalog_description ?? true,
         products: products || [],
       },
     });

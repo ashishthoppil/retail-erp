@@ -13,6 +13,7 @@ create table if not exists public.products (
   batch_id uuid references public.batches(id) on delete set null,
   image_url text,
   name text not null,
+  description text,
   buying_price numeric(12, 2) not null,
   selling_price numeric(12, 2) not null,
   initial_quantity integer not null default 0,
@@ -56,6 +57,12 @@ create table if not exists public.expenses (
 create table if not exists public.profiles (
   user_id uuid primary key references auth.users(id) on delete cascade,
   business_name text,
+  instagram_url text,
+  facebook_url text,
+  website_url text,
+  phone_number text,
+  show_catalog_price boolean not null default true,
+  show_catalog_description boolean not null default true,
   created_at timestamptz not null default now()
 );
 
