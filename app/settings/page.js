@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { toast } from "react-toastify";
 import AppShell from "../components/AppShell";
-import Toast from "../components/Toast";
 import { getSupabaseBrowser } from "../lib/supabase-browser";
 
 export default function SettingsPage() {
@@ -18,12 +18,6 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [subscription, setSubscription] = useState(null);
   const [loadingPlan, setLoadingPlan] = useState(true);
-  const [toast, setToast] = useState({ message: "", visible: false });
-
-  const showToast = (message) => {
-    setToast({ message, visible: true });
-    window.setTimeout(() => setToast({ message: "", visible: false }), 2200);
-  };
 
   useEffect(() => {
     let mounted = true;
@@ -85,7 +79,7 @@ export default function SettingsPage() {
       data: { user },
     } = await supabase.auth.getUser();
     if (!user) {
-      showToast("Please sign in again.");
+      toast("Please sign in again.");
       setSaving(false);
       return;
     }
@@ -105,9 +99,9 @@ export default function SettingsPage() {
     );
 
     if (error) {
-      showToast(error.message || "Unable to update settings.");
+      toast(error.message || "Unable to update settings.");
     } else {
-      showToast("Settings updated.");
+      toast("Settings updated.");
     }
     setSaving(false);
   };
@@ -117,7 +111,6 @@ export default function SettingsPage() {
       title="Settings"
       subtitle="Manage your business profile and subscription details."
     >
-      <Toast message={toast.message} visible={toast.visible} />
       <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr]">
         <section className="rounded-[28px] border border-black/10 bg-white/80 p-6 shadow-[var(--shadow)] backdrop-blur">
           <h2 className="font-serif text-2xl text-[color:var(--ink)]">

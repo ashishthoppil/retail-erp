@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import Toast from "../components/Toast";
+import { toast } from "react-toastify";
 import { getSupabaseBrowser } from "../lib/supabase-browser";
 
 const PLAN = {
@@ -24,13 +24,7 @@ export default function PlanPage() {
   const [loading, setLoading] = useState(true);
   const [paying, setPaying] = useState(false);
   const [pollingPayment, setPollingPayment] = useState(false);
-  const [toast, setToast] = useState({ message: "", visible: false });
   const pollRef = useRef(null);
-
-  const showToast = (message) => {
-    setToast({ message, visible: true });
-    window.setTimeout(() => setToast({ message: "", visible: false }), 2400);
-  };
 
   useEffect(() => {
     let mounted = true;
@@ -78,7 +72,7 @@ export default function PlanPage() {
           }
         }
       } catch (error) {
-        showToast("Unable to refresh payment status.");
+        toast("Unable to refresh payment status.");
       }
     };
 
@@ -100,7 +94,7 @@ export default function PlanPage() {
     });
     const json = await response.json();
     if (!response.ok) {
-      showToast(json.error || "Unable to start payment.");
+      toast(json.error || "Unable to start payment.");
       setPaying(false);
       return;
     } else {
@@ -125,11 +119,11 @@ export default function PlanPage() {
     //     });
     //     const verifyJson = await verifyResponse.json();
     //     if (!verifyResponse.ok) {
-    //       showToast(verifyJson.error || "Payment verification failed.");
+    //       toast(verifyJson.error || "Payment verification failed.");
     //       setPaying(false);
     //       return;
     //     }
-    //     showToast("Payment successful.");
+    //     toast("Payment successful.");
     //     router.push("/");
     //   },
     //   modal: {
@@ -144,13 +138,12 @@ export default function PlanPage() {
   const isActive = subscription?.status === "active";
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    showToast("Logged out.");
+    toast("Logged out.");
     router.push("/auth");
   };
 
   return (
     <div className="min-h-screen px-6 py-12 sm:px-10">
-      <Toast message={toast.message} visible={toast.visible} />
       <div className="mx-auto w-full max-w-6xl">
         <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-end">
           <div>

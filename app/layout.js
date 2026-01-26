@@ -1,5 +1,6 @@
 import { Fraunces, Manrope } from "next/font/google";
 import "./globals.css";
+import ToastProvider from "./components/ToastProvider";
 
 const fraunces = Fraunces({
   variable: "--font-fraunces",
@@ -20,6 +21,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={`${fraunces.variable} ${manrope.variable} antialiased`}>
+        <ToastProvider />
         {children}
       </body>
     </html>

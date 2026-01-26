@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Toast from "../components/Toast";
+import { toast } from "react-toastify";
 import { PlusCircleIcon } from "lucide-react";
 
 const PAGE_SIZE = 10;
@@ -16,7 +16,6 @@ const emptyLine = {
 export default function PlaceOrderClient() {
   const [products, setProducts] = useState([]);
   const [status, setStatus] = useState("");
-  const [toast, setToast] = useState({ message: "", visible: false });
   const [productQuery, setProductQuery] = useState("");
   const [productPage, setProductPage] = useState(1);
   const [productsLoading, setProductsLoading] = useState(true);
@@ -46,13 +45,6 @@ export default function PlaceOrderClient() {
   useEffect(() => {
     setProductPage(1);
   }, [productQuery]);
-
-  function showToast(message) {
-    setToast({ message, visible: true });
-    window.setTimeout(() => {
-      setToast({ message: "", visible: false });
-    }, 2400);
-  }
 
   function openOrderModal() {
     setIsOrderOpen(true);
@@ -154,7 +146,7 @@ export default function PlaceOrderClient() {
     }
 
     await loadProducts();
-    showToast("Order saved.");
+    toast("Order saved.");
     closeOrderModal();
     setOrderSaving(false);
   }
@@ -178,7 +170,6 @@ export default function PlaceOrderClient() {
 
   return (
     <div className="space-y-6">
-      <Toast message={toast.message} visible={toast.visible} />
       {status ? (
         <div className="rounded-2xl bg-[color:var(--clay)] px-4 py-3 text-sm text-black/70">
           {status}

@@ -3,9 +3,19 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { toast } from "react-toastify";
 import { getSupabaseBrowser } from "../lib/supabase-browser";
-import Toast from "./Toast";
-import { ChartNoAxesCombinedIcon, HandCoinsIcon, Home, LogOutIcon, MenuIcon, Package, Settings, ShoppingBasketIcon, X } from "lucide-react";
+import {
+  ChartNoAxesCombinedIcon,
+  HandCoinsIcon,
+  Home,
+  LogOutIcon,
+  MenuIcon,
+  Package,
+  Settings,
+  ShoppingBasketIcon,
+  X,
+} from "lucide-react";
 
 const navLinks = [
   { href: "/dashboard", label: "Dashboard", icon: Home },
@@ -21,24 +31,16 @@ export default function AppShell({ title, subtitle, children }) {
   const router = useRouter();
   const supabase = useMemo(() => getSupabaseBrowser(), []);
   const [isNavOpen, setIsNavOpen] = useState(false);
-  const [toast, setToast] = useState({ message: "", visible: false });
 
   const handleCloseNav = () => setIsNavOpen(false);
-  const showToast = (message) => {
-    setToast({ message, visible: true });
-    window.setTimeout(() => {
-      setToast({ message: "", visible: false });
-    }, 2000);
-  };
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    showToast("Logged out.");
+    toast("Logged out.");
     router.push("/auth");
   };
 
   return (
     <div className="min-h-screen px-4 py-6 sm:px-10 sm:py-10">
-      <Toast message={toast.message} visible={toast.visible} />
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 lg:flex-row">
         <aside className="hidden lg:flex lg:w-60 lg:flex-col lg:gap-3 lg:rounded-3xl lg:border lg:border-black/10 lg:bg-white/80 lg:p-6 lg:shadow-[var(--shadow)] lg:backdrop-blur">
           <p className="text-xs uppercase tracking-[0.3em] text-[color:var(--sage)]">

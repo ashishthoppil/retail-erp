@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Toast from "../components/Toast";
+import { toast } from "react-toastify";
 
 const emptyExpense = {
   expense_type: "",
@@ -16,7 +16,6 @@ export default function ExpensesClient() {
   const [editingId, setEditingId] = useState(null);
   const [editingExpense, setEditingExpense] = useState(null);
   const [status, setStatus] = useState("");
-  const [toast, setToast] = useState({ message: "", visible: false });
   const [expensesLoading, setExpensesLoading] = useState(true);
   const [expenseSaving, setExpenseSaving] = useState(false);
   const [expenseUpdatingId, setExpenseUpdatingId] = useState(null);
@@ -31,13 +30,6 @@ export default function ExpensesClient() {
   useEffect(() => {
     setExpensePage(1);
   }, [expenseQuery]);
-
-  function showToast(message) {
-    setToast({ message, visible: true });
-    window.setTimeout(() => {
-      setToast({ message: "", visible: false });
-    }, 2400);
-  }
 
   async function loadExpenses() {
     setExpensesLoading(true);
@@ -69,7 +61,7 @@ export default function ExpensesClient() {
     }
     setForm(emptyExpense);
     setExpenses((prev) => [json.data, ...prev]);
-    showToast("Expense saved.");
+    toast("Expense saved.");
     setExpenseSaving(false);
   }
 
@@ -105,7 +97,7 @@ export default function ExpensesClient() {
       prev.map((item) => (item.id === expenseId ? json.data : item))
     );
     cancelEdit();
-    showToast("Expense updated.");
+    toast("Expense updated.");
     setExpenseUpdatingId(null);
   }
 
@@ -126,7 +118,7 @@ export default function ExpensesClient() {
       return;
     }
     setExpenses((prev) => prev.filter((item) => item.id !== expenseId));
-    showToast("Expense deleted.");
+    toast("Expense deleted.");
     setExpenseDeletingId(null);
   }
 
@@ -151,7 +143,6 @@ export default function ExpensesClient() {
 
   return (
     <div className="space-y-10">
-      <Toast message={toast.message} visible={toast.visible} />
       <section className="rounded-[28px] border border-black/10 bg-white/80 p-6 shadow-sm">
         <h2 className="font-serif text-2xl text-[color:var(--ink)]">
           Log an expense

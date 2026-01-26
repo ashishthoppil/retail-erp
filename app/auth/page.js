@@ -2,8 +2,9 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
+import { Eye, EyeOff } from "lucide-react";
 import { getSupabaseBrowser } from "../lib/supabase-browser";
-import Toast from "../components/Toast";
 
 export default function AuthPage() {
   const router = useRouter();
@@ -12,16 +13,9 @@ export default function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [businessName, setBusinessName] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(false);
-  const [toast, setToast] = useState({ message: "", visible: false });
-
-  function showToast(message) {
-    setToast({ message, visible: true });
-    window.setTimeout(() => {
-      setToast({ message: "", visible: false });
-    }, 2400);
-  }
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -40,7 +34,7 @@ export default function AuthPage() {
       const { data, error } = await supabase.auth.signUp(payload);
       if (error) {
         setStatus(error.message);
-        showToast(error.message);
+        toast(error.message);
         setLoading(false);
         return;
       }
@@ -54,7 +48,7 @@ export default function AuthPage() {
         });
         if (signInError) {
           setStatus(signInError.message);
-          showToast(signInError.message);
+          toast(signInError.message);
           setLoading(false);
           return;
         }
@@ -67,17 +61,17 @@ export default function AuthPage() {
           .upsert({ user_id: userId, business_name: businessName });
       }
 
-      showToast("Registration successful.");
+      toast("Registration successful.");
       window.setTimeout(() => router.push("/plan"), 900);
     } else {
       const { error } = await supabase.auth.signInWithPassword(payload);
       if (error) {
         setStatus(error.message);
-        showToast(error.message);
+        toast(error.message);
         setLoading(false);
         return;
       }
-      showToast("Login successful.");
+      toast("Login successful.");
       window.setTimeout(() => router.push("/"), 900);
     }
     setLoading(false);
@@ -85,7 +79,6 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen px-6 py-12 sm:px-10">
-      <Toast message={toast.message} visible={toast.visible} />
       <div className="mx-auto w-full max-w-lg rounded-[32px] border border-black/10 bg-white/90 p-8 shadow-[var(--shadow)] backdrop-blur">
         <p className="text-xs uppercase tracking-[0.35em] text-[color:var(--sage)]">
           Retail Omega
@@ -140,14 +133,28 @@ export default function AuthPage() {
             <label className="text-xs uppercase tracking-[0.2em] text-black/50">
               Password
             </label>
-            <input
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              placeholder="••••••••"
-              type="password"
-              className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm focus:border-[color:var(--sage)] focus:outline-none"
-              required
-            />
+            <div className="relative">
+              <input
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                placeholder="********"
+                type={showPassword ? "text" : "password"}
+                className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 pr-12 text-sm focus:border-[color:var(--sage)] focus:outline-none"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-black/60 hover:text-black"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
+              </button>
+            </div>
           </div>
           {mode === "register" ? (
             <div className="flex flex-col gap-2">

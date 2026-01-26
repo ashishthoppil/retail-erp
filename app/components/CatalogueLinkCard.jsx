@@ -1,14 +1,13 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Toast from "./Toast";
+import { toast } from "react-toastify";
 import { getSupabaseBrowser } from "../lib/supabase-browser";
 import { CopyIcon } from "lucide-react";
 
 export default function CatalogueLinkCard() {
   const supabase = useMemo(() => getSupabaseBrowser(), []);
   const [userId, setUserId] = useState("");
-  const [toast, setToast] = useState({ message: "", visible: false });
 
   useEffect(() => {
     async function loadUser() {
@@ -18,11 +17,6 @@ export default function CatalogueLinkCard() {
     loadUser();
   }, [supabase]);
 
-  const showToast = (message) => {
-    setToast({ message, visible: true });
-    window.setTimeout(() => setToast({ message: "", visible: false }), 2000);
-  };
-
   const link =
     typeof window !== "undefined" && userId
       ? `${window.location.origin}/catalog?user_id=${userId}`
@@ -31,12 +25,11 @@ export default function CatalogueLinkCard() {
   async function handleCopy() {
     if (!link) return;
     await navigator.clipboard.writeText(link);
-    showToast("Catalogue link copied.");
+    toast("Catalogue link copied.");
   }
 
   return (
     <section className="rounded-[28px] border border-black/10 bg-white/85 p-6 shadow-sm">
-      <Toast message={toast.message} visible={toast.visible} />
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <p className="text-xs uppercase tracking-[0.2em] text-black/50">

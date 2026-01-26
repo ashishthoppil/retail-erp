@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Toast from "../components/Toast";
+import { toast } from "react-toastify";
 
 const emptyProduct = {
   batch_id: "",
@@ -19,7 +19,6 @@ export default function AddStockClient() {
   const [batchName, setBatchName] = useState("");
   const [product, setProduct] = useState(emptyProduct);
   const [productFile, setProductFile] = useState(null);
-  const [toast, setToast] = useState({ message: "", visible: false });
   const [batches, setBatches] = useState([]);
   const [products, setProducts] = useState([]);
   const [batchesLoading, setBatchesLoading] = useState(true);
@@ -55,13 +54,6 @@ export default function AddStockClient() {
       }
     };
   }, [imagePreview, productFile]);
-
-  function showToast(message) {
-    setToast({ message, visible: true });
-    window.setTimeout(() => {
-      setToast({ message: "", visible: false });
-    }, 2400);
-  }
 
   async function loadData() {
     setBatchesLoading(true);
@@ -118,7 +110,7 @@ export default function AddStockClient() {
     }
     setBatchName("");
     setBatches((prev) => [json.data, ...prev]);
-    showToast("Batch saved.");
+    toast("Batch saved.");
     setBatchSaving(false);
   }
 
@@ -150,7 +142,7 @@ export default function AddStockClient() {
       prev.map((item) => (item.id === batchId ? json.data : item))
     );
     cancelBatchEdit();
-    showToast("Batch updated.");
+    toast("Batch updated.");
     setBatchUpdatingId(null);
   }
 
@@ -171,7 +163,7 @@ export default function AddStockClient() {
       return;
     }
     setBatches((prev) => prev.filter((item) => item.id !== batchId));
-    showToast("Batch deleted.");
+    toast("Batch deleted.");
     setBatchDeletingId(null);
   }
 
@@ -211,7 +203,7 @@ export default function AddStockClient() {
     setProduct(emptyProduct);
     setProductFile(null);
     setProducts((prev) => [json.data, ...prev]);
-    showToast("Product saved.");
+    toast("Product saved.");
     setProductSaving(false);
   }
 
@@ -272,7 +264,7 @@ export default function AddStockClient() {
       prev.map((item) => (item.id === productId ? json.data : item))
     );
     cancelProductEdit();
-    showToast("Product updated.");
+    toast("Product updated.");
     setProductUpdatingId(null);
   }
 
@@ -293,7 +285,7 @@ export default function AddStockClient() {
       return;
     }
     setProducts((prev) => prev.filter((item) => item.id !== productId));
-    showToast("Product deleted.");
+    toast("Product deleted.");
     setProductDeletingId(null);
   }
 
@@ -336,7 +328,6 @@ export default function AddStockClient() {
 
   return (
     <div className="space-y-10">
-      <Toast message={toast.message} visible={toast.visible} />
       <section className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
         <form
           onSubmit={handleBatchSubmit}

@@ -1,13 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Toast from "./Toast";
+import { toast } from "react-toastify";
 
 export default function CapitalCard() {
   const [amount, setAmount] = useState("");
   const [current, setCurrent] = useState(null);
   const [status, setStatus] = useState("");
-  const [toast, setToast] = useState({ message: "", visible: false });
   const [capitalSaving, setCapitalSaving] = useState(false);
 
   useEffect(() => {
@@ -22,13 +21,6 @@ export default function CapitalCard() {
     }
     loadCapital();
   }, []);
-
-  function showToast(message) {
-    setToast({ message, visible: true });
-    window.setTimeout(() => {
-      setToast({ message: "", visible: false });
-    }, 2400);
-  }
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -47,7 +39,7 @@ export default function CapitalCard() {
     }
     setCurrent(json.data);
     setAmount("");
-    showToast("Capital updated.");
+    toast("Capital updated.");
     setCapitalSaving(false);
   }
 
@@ -59,7 +51,6 @@ export default function CapitalCard() {
 
   return (
     <section className="rounded-[28px] border border-black/10 bg-white/85 p-6 shadow-sm">
-      <Toast message={toast.message} visible={toast.visible} />
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <p className="text-xs uppercase tracking-[0.2em] text-black/50">

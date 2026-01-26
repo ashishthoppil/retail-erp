@@ -1,3 +1,4 @@
+import { CheckIcon } from "lucide-react";
 import Link from "next/link";
 
 export default function Home() {
@@ -92,7 +93,7 @@ export default function Home() {
               ].map((item) => (
                 <div key={item.title} className="flex gap-4">
                   <div className="flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white text-xs font-semibold text-black/60">
-                    ●
+                    <CheckIcon />
                   </div>
                   <div>
                     <p className="font-semibold text-[color:var(--ink)]">
@@ -145,7 +146,7 @@ export default function Home() {
               ].map((item) => (
                 <div key={item.title} className="flex gap-4">
                   <div className="flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white text-xs font-semibold text-black/60">
-                    ●
+                    <CheckIcon />
                   </div>
                   <div>
                     <p className="font-semibold text-[color:var(--ink)]">
@@ -189,7 +190,7 @@ export default function Home() {
               ].map((item) => (
                 <div key={item.title} className="flex gap-4">
                   <div className="flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white text-xs font-semibold text-black/60">
-                    ●
+                    <CheckIcon />
                   </div>
                   <div>
                     <p className="font-semibold text-[color:var(--ink)]">
