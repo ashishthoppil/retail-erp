@@ -90,13 +90,6 @@ export default function AppShell({ title, subtitle, children }) {
           <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={handleLogout}
-              className="rounded-full border border-black/10 bg-white px-4 py-2 text-xs uppercase tracking-[0.25em] text-black"
-            >
-              <LogOutIcon className="h-4" />
-            </button>
-            <button
-              type="button"
               onClick={() => setIsNavOpen(true)}
               className="rounded-full border border-black/10 bg-white px-4 py-2 text-xs uppercase tracking-[0.25em] text-black"
             >
