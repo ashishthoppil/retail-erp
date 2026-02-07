@@ -61,6 +61,12 @@ export default function AuthPage() {
           .upsert({ user_id: userId, business_name: businessName });
       }
 
+      try {
+        await fetch("/api/email/welcome", { method: "POST" });
+      } catch (error) {
+        console.warn("Failed to send welcome email.", error);
+      }
+
       toast("Registration successful.");
       window.setTimeout(() => router.push("/plan"), 900);
     } else {
