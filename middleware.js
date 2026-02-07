@@ -25,8 +25,6 @@ export async function middleware(request) {
 
   const pathname = request.nextUrl.pathname;
   const isAuthPage = pathname === "/auth";
-  const isPlanPage = pathname === "/plan";
-  const isWebhook = pathname === "/api/razorpay/webhook";
   const isCatalog = pathname.startsWith("/catalog");
   const isCatalogApi = pathname.startsWith("/api/catalog");
   const isLanding = pathname === "/";
@@ -40,35 +38,9 @@ export async function middleware(request) {
     return NextResponse.redirect(redirectUrl);
   }
 
-  if (
-    user &&
-    !isPlanPage &&
-    !isWebhook &&
-    !isCatalog &&
-    !isCatalogApi &&
-    pathname !== "/api/razorpay/order"
-  ) {
-    const { data: subscription } = await supabase
-      .from("subscriptions")
-      .select("status")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .single();
-
-    if (!subscription || subscription.status !== "active") {
-      if (isLanding) {
-        const redirectUrl = new URL("/plan", request.url);
-        return NextResponse.redirect(redirectUrl);
-      }
-      const redirectUrl = new URL("/plan", request.url);
-      return NextResponse.redirect(redirectUrl);
-    }
-
-    if (isLanding) {
-      const redirectUrl = new URL("/dashboard", request.url);
-      return NextResponse.redirect(redirectUrl);
-    }
+  if (user && isLanding) {
+    const redirectUrl = new URL("/dashboard", request.url);
+    return NextResponse.redirect(redirectUrl);
   }
 
   return response;
