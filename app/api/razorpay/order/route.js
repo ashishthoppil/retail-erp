@@ -58,8 +58,8 @@ export async function POST() {
       console.log('existingSubscription');
 
     const subscription = await razorpay.subscriptions.create({
-      // "plan_id": "plan_S7eo9kC5B9U1Xf",
-      "plan_id": "plan_S7mm8kacz6KeM4",
+      "plan_id": "plan_SDAwcmWwmPWjtH",
+      // "plan_id": "plan_S7mm8kacz6KeM4",
       "total_count": 12,
       "customer_notify": 1,
     });
