@@ -58,7 +58,7 @@ export async function POST(request) {
     }
 
     if (!user.email) {
-      return NextResponse.json({ error: "Missing user email." }, { status: 400 });
+      return NextResponse.json({ error: "Missing user email. " }, { status: 400 });
     }
 
     const appUrl =
