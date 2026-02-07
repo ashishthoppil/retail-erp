@@ -55,13 +55,12 @@ export async function POST() {
         url: existingRazorpay.short_url,
       });
     }
-      console.log('existingSubscription');
 
     const subscription = await razorpay.subscriptions.create({
       "plan_id": "plan_SDAwcmWwmPWjtH",
       // "plan_id": "plan_S7mm8kacz6KeM4",
       "total_count": 12,
-      "customer_notify": 1,
+      "customer_notify": 0,
     });
 
     const subscriptionPayload = {
