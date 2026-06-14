@@ -101,38 +101,6 @@ export default function PlanPage() {
       window.open(json.url);
       setPollingPayment(true);
     }
-
-    // const { data } = await supabase.auth.getUser();
-    // const options = {
-    //   key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-    //   amount: json.amount,
-    //   currency: json.currency,
-    //   name: "Retail Omega",
-    //   description: PLAN.name,
-    //   subscription_id: json.subscription_id,
-    //   prefill: { email: data.user?.email || "" },
-    //   handler: async (payload) => {
-    //     const verifyResponse = await fetch("/api/razorpay/verify", {
-    //       method: "POST",
-    //       headers: { "Content-Type": "application/json" },
-    //       body: JSON.stringify(payload),
-    //     });
-    //     const verifyJson = await verifyResponse.json();
-    //     if (!verifyResponse.ok) {
-    //       toast(verifyJson.error || "Payment verification failed.");
-    //       setPaying(false);
-    //       return;
-    //     }
-    //     toast("Payment successful.");
-    //     router.push("/");
-    //   },
-    //   modal: {
-    //     ondismiss: () => setPaying(false),
-    //   },
-    // };
-
-    // const razorpay = new window.Razorpay(options);
-    // razorpay.open();
   };
 
   const isActive = subscription?.status === "active";
