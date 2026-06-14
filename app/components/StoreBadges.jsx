@@ -38,17 +38,26 @@ function PlayLogo({ className }) {
   );
 }
 
-export default function StoreBadges({ className = "", align = "start" }) {
+export default function StoreBadges({
+  className = "",
+  align = "start",
+  variant = "dark",
+}) {
   const justify = align === "center" ? "justify-center" : "justify-start";
+  const base =
+    variant === "light"
+      ? "bg-white text-slate-900 ring-1 ring-black/5"
+      : "bg-slate-900 text-white";
+  const sub = variant === "light" ? "text-slate-500" : "text-white/70";
   return (
     <div className={`flex flex-wrap items-center gap-3 ${justify} ${className}`}>
       <a
         href={APP_STORE_URL}
-        className="group inline-flex items-center gap-3 rounded-2xl bg-[color:var(--ink)] px-5 py-3 text-white shadow-md transition hover:-translate-y-0.5 hover:shadow-lg"
+        className={`group inline-flex items-center gap-3 rounded-2xl px-5 py-3 shadow-md transition hover:-translate-y-0.5 hover:shadow-xl ${base}`}
       >
         <AppleLogo className="h-7 w-7" />
         <span className="flex flex-col leading-none">
-          <span className="text-[10px] font-medium uppercase tracking-wide text-white/70">
+          <span className={`text-[10px] font-medium uppercase tracking-wide ${sub}`}>
             Download on the
           </span>
           <span className="mt-0.5 text-lg font-semibold tracking-tight">
@@ -59,11 +68,11 @@ export default function StoreBadges({ className = "", align = "start" }) {
 
       <a
         href={PLAY_STORE_URL}
-        className="group inline-flex items-center gap-3 rounded-2xl bg-[color:var(--ink)] px-5 py-3 text-white shadow-md transition hover:-translate-y-0.5 hover:shadow-lg"
+        className={`group inline-flex items-center gap-3 rounded-2xl px-5 py-3 shadow-md transition hover:-translate-y-0.5 hover:shadow-xl ${base}`}
       >
         <PlayLogo className="h-6 w-6" />
         <span className="flex flex-col leading-none">
-          <span className="text-[10px] font-medium uppercase tracking-wide text-white/70">
+          <span className={`text-[10px] font-medium uppercase tracking-wide ${sub}`}>
             Get it on
           </span>
           <span className="mt-0.5 text-lg font-semibold tracking-tight">

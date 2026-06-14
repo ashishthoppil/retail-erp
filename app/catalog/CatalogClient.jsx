@@ -11,6 +11,8 @@ import {
   X,
 } from "lucide-react";
 
+const BRAND_GRADIENT = "bg-gradient-to-br from-[#16399c] via-[#1b73c0] to-[#36ab3b]";
+
 function money(value) {
   if (value == null || value === "") return "";
   const n = Number(value);
@@ -20,12 +22,12 @@ function money(value) {
 
 function CardSkeleton() {
   return (
-    <div className="flex flex-col overflow-hidden rounded-[28px] border border-black/10 bg-white/70">
-      <div className="h-52 animate-pulse bg-[color:var(--clay)]/40" />
+    <div className="flex flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white">
+      <div className="h-52 animate-pulse bg-slate-100" />
       <div className="space-y-3 p-5">
-        <div className="h-5 w-2/3 animate-pulse rounded-full bg-black/10" />
-        <div className="h-4 w-full animate-pulse rounded-full bg-black/5" />
-        <div className="h-6 w-1/3 animate-pulse rounded-full bg-black/10" />
+        <div className="h-5 w-2/3 animate-pulse rounded-full bg-slate-100" />
+        <div className="h-4 w-full animate-pulse rounded-full bg-slate-50" />
+        <div className="h-6 w-1/3 animate-pulse rounded-full bg-slate-100" />
       </div>
     </div>
   );
@@ -114,21 +116,29 @@ export default function CatalogClient({ userId }) {
     .toUpperCase();
 
   return (
-    <div className="min-h-screen px-4 py-8 sm:px-10 sm:py-12">
+    <div className="relative min-h-screen overflow-hidden bg-white px-4 py-8 text-slate-900 sm:px-10 sm:py-12">
+      {/* Ambient background */}
+      <div className="pointer-events-none absolute inset-0 -z-10">
+        <div className="absolute -left-40 -top-40 h-[28rem] w-[28rem] rounded-full bg-blue-500/10 blur-3xl" />
+        <div className="absolute -right-40 top-32 h-[28rem] w-[28rem] rounded-full bg-green-500/10 blur-3xl" />
+      </div>
+
       {/* Header */}
-      <header className="mx-auto w-full max-w-6xl overflow-hidden rounded-[32px] border border-black/10 bg-white/85 shadow-[var(--shadow)] backdrop-blur">
-        <div className="h-28 bg-gradient-to-br from-[color:var(--clay)] via-[color:var(--cream)] to-[color:var(--sage)]/40 sm:h-32" />
+      <header className="mx-auto w-full max-w-6xl overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl">
+        <div className={`h-28 sm:h-32 ${BRAND_GRADIENT}`}>
+          <div className="h-full w-full bg-[radial-gradient(circle_at_25%_20%,rgba(255,255,255,0.25),transparent_55%)]" />
+        </div>
         <div className="px-6 pb-7 sm:px-9">
-          <div className="-mt-10 flex h-20 w-20 items-center justify-center rounded-3xl border-4 border-white bg-[color:var(--ink)] text-2xl font-bold text-white shadow-md">
+          <div className="-mt-10 flex h-20 w-20 items-center justify-center rounded-3xl border-4 border-white bg-slate-900 text-2xl font-bold text-white shadow-lg">
             {initials}
           </div>
-          <p className="mt-4 text-xs font-semibold uppercase tracking-[0.3em] text-[color:var(--sage)]">
+          <p className="mt-4 text-xs font-bold uppercase tracking-[0.2em] text-green-600">
             Catalogue
           </p>
-          <h1 className="mt-1 font-serif text-4xl text-[color:var(--ink)] sm:text-5xl">
+          <h1 className="mt-1 text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl">
             {catalog.business_name || "Retail Omega"}
           </h1>
-          <p className="mt-2 text-sm text-black/55">
+          <p className="mt-2 text-sm text-slate-500">
             Browse the latest pieces available for order.
           </p>
 
@@ -140,7 +150,7 @@ export default function CatalogClient({ userId }) {
                   href={c.href}
                   target={c.href?.startsWith("http") ? "_blank" : undefined}
                   rel="noreferrer"
-                  className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-3.5 py-1.5 text-black/65 transition hover:-translate-y-0.5 hover:border-transparent hover:bg-[color:var(--ink)] hover:text-white"
+                  className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3.5 py-1.5 font-medium text-slate-600 transition hover:-translate-y-0.5 hover:border-transparent hover:bg-slate-900 hover:text-white"
                 >
                   <c.icon className="h-4 w-4" />
                   {c.label}
@@ -150,9 +160,7 @@ export default function CatalogClient({ userId }) {
           ) : null}
 
           {status ? (
-            <p className="mt-4 text-sm font-medium text-[color:var(--copper)]">
-              {status}
-            </p>
+            <p className="mt-4 text-sm font-medium text-red-500">{status}</p>
           ) : null}
         </div>
       </header>
@@ -160,19 +168,19 @@ export default function CatalogClient({ userId }) {
       {/* Search */}
       {!loading && catalog.products.length ? (
         <div className="mx-auto mt-6 w-full max-w-6xl">
-          <div className="flex items-center gap-3 rounded-full border border-black/10 bg-white/85 px-5 py-3 shadow-sm backdrop-blur">
-            <Search className="h-5 w-5 text-black/40" />
+          <div className="flex items-center gap-3 rounded-full border border-slate-200 bg-white px-5 py-3 shadow-sm">
+            <Search className="h-5 w-5 text-slate-400" />
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search products"
-              className="w-full bg-transparent text-sm text-[color:var(--ink)] outline-none placeholder:text-black/40"
+              className="w-full bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-400"
             />
             {query ? (
               <button
                 type="button"
                 onClick={() => setQuery("")}
-                className="text-black/40 transition hover:text-black"
+                className="text-slate-400 transition hover:text-slate-900"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -191,9 +199,9 @@ export default function CatalogClient({ userId }) {
               key={product.id}
               type="button"
               onClick={() => setSelected(product)}
-              className="group flex flex-col overflow-hidden rounded-[28px] border border-black/10 bg-white/85 text-left shadow-sm transition hover:-translate-y-1.5 hover:shadow-[var(--shadow)]"
+              className="group flex flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white text-left shadow-sm transition hover:-translate-y-1.5 hover:border-transparent hover:shadow-xl"
             >
-              <div className="relative h-52 overflow-hidden bg-[color:var(--clay)]/50">
+              <div className="relative h-52 overflow-hidden bg-slate-100">
                 {product.image_url ? (
                   <img
                     src={product.image_url}
@@ -201,41 +209,41 @@ export default function CatalogClient({ userId }) {
                     className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
                   />
                 ) : (
-                  <div className="flex h-full w-full items-center justify-center text-[color:var(--ink)]/30">
+                  <div className="flex h-full w-full items-center justify-center text-slate-300">
                     <ShoppingBag className="h-10 w-10" />
                   </div>
                 )}
                 {catalog.show_catalog_price ? (
-                  <span className="absolute bottom-3 left-3 rounded-full bg-white/95 px-3 py-1 text-sm font-semibold text-[color:var(--ink)] shadow-sm backdrop-blur">
+                  <span className="absolute bottom-3 left-3 rounded-full bg-white/95 px-3 py-1 text-sm font-bold text-slate-900 shadow-sm backdrop-blur">
                     {money(product.selling_price)}
                   </span>
                 ) : null}
               </div>
               <div className="flex flex-1 flex-col p-5">
-                <h2 className="font-serif text-2xl text-[color:var(--ink)]">
+                <h2 className="text-lg font-bold text-slate-900">
                   {product.name}
                 </h2>
-                <p className="mt-2 line-clamp-2 text-sm text-black/55">
+                <p className="mt-2 line-clamp-2 text-sm text-slate-500">
                   {catalog.show_catalog_description &&
                   product.description?.trim()
                     ? product.description
                     : "Tap to view details."}
                 </p>
-                <span className="mt-4 inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--copper)] opacity-0 transition group-hover:opacity-100">
+                <span className="mt-4 inline-flex items-center gap-1 text-xs font-bold uppercase tracking-[0.15em] text-green-600 opacity-0 transition group-hover:opacity-100">
                   View details →
                 </span>
               </div>
             </button>
           ))
         ) : (
-          <div className="col-span-full rounded-[28px] border border-dashed border-black/15 bg-white/70 py-16 text-center">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[color:var(--cream)] text-[color:var(--copper)]">
+          <div className="col-span-full rounded-3xl border border-dashed border-slate-300 bg-white py-16 text-center">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
               <ShoppingBag className="h-6 w-6" />
             </div>
-            <p className="mt-4 font-serif text-2xl text-[color:var(--ink)]">
+            <p className="mt-4 text-2xl font-bold text-slate-900">
               {query ? "No matching products" : "No products yet"}
             </p>
-            <p className="mt-1 text-sm text-black/55">
+            <p className="mt-1 text-sm text-slate-500">
               {query
                 ? "Try a different search term."
                 : "Check back soon for new pieces."}
@@ -247,32 +255,32 @@ export default function CatalogClient({ userId }) {
       {/* Detail modal */}
       {selected ? (
         <div
-          className="fixed inset-0 z-40 flex items-end justify-center bg-black/50 p-0 backdrop-blur-sm sm:items-center sm:p-4"
+          className="fixed inset-0 z-40 flex items-end justify-center bg-slate-900/50 p-0 backdrop-blur-sm sm:items-center sm:p-4"
           onClick={() => setSelected(null)}
         >
           <div
-            className="max-h-[92vh] w-full max-w-xl overflow-y-auto rounded-t-[32px] bg-white p-6 shadow-[var(--shadow)] sm:rounded-[32px]"
+            className="max-h-[92vh] w-full max-w-xl overflow-y-auto rounded-t-3xl bg-white p-6 shadow-2xl sm:rounded-3xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[color:var(--sage)]">
+                <p className="text-xs font-bold uppercase tracking-[0.2em] text-green-600">
                   Product
                 </p>
-                <h3 className="mt-2 font-serif text-3xl text-[color:var(--ink)]">
+                <h3 className="mt-2 text-2xl font-extrabold tracking-tight text-slate-900">
                   {selected.name}
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setSelected(null)}
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-black/10 text-black/55 transition hover:bg-black/5"
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-slate-200 text-slate-500 transition hover:bg-slate-100"
               >
                 <X className="h-4 w-4" />
               </button>
             </div>
 
-            <div className="mt-5 overflow-hidden rounded-3xl border border-black/10 bg-[color:var(--clay)]/40">
+            <div className="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-slate-100">
               {selected.image_url ? (
                 <img
                   src={selected.image_url}
@@ -280,18 +288,18 @@ export default function CatalogClient({ userId }) {
                   className="h-64 w-full object-cover"
                 />
               ) : (
-                <div className="flex h-64 w-full items-center justify-center text-[color:var(--ink)]/30">
+                <div className="flex h-64 w-full items-center justify-center text-slate-300">
                   <ShoppingBag className="h-12 w-12" />
                 </div>
               )}
             </div>
 
             {catalog.show_catalog_price ? (
-              <div className="mt-5 flex items-center justify-between rounded-2xl bg-[color:var(--cream)] px-5 py-4">
-                <span className="text-xs font-semibold uppercase tracking-[0.2em] text-black/50">
+              <div className="mt-5 flex items-center justify-between rounded-2xl bg-slate-50 px-5 py-4">
+                <span className="text-xs font-bold uppercase tracking-[0.15em] text-slate-500">
                   Price
                 </span>
-                <span className="font-serif text-2xl text-[color:var(--ink)]">
+                <span className="text-2xl font-extrabold text-slate-900">
                   {money(selected.selling_price)}
                 </span>
               </div>
@@ -299,10 +307,10 @@ export default function CatalogClient({ userId }) {
 
             {catalog.show_catalog_description && selected.description?.trim() ? (
               <div className="mt-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-black/50">
+                <p className="text-xs font-bold uppercase tracking-[0.15em] text-slate-500">
                   Description
                 </p>
-                <p className="mt-2 text-sm leading-relaxed text-black/70">
+                <p className="mt-2 text-sm leading-relaxed text-slate-600">
                   {selected.description}
                 </p>
               </div>
@@ -311,13 +319,13 @@ export default function CatalogClient({ userId }) {
             {catalog.phone_number ? (
               <a
                 href={`tel:${catalog.phone_number}`}
-                className="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-[color:var(--ink)] px-6 py-3.5 text-sm font-semibold text-white transition hover:opacity-90"
+                className={`mt-6 flex w-full items-center justify-center gap-2 rounded-full px-6 py-3.5 text-sm font-semibold text-white shadow-md transition hover:opacity-90 ${BRAND_GRADIENT}`}
               >
                 <Phone className="h-4 w-4" />
                 Contact to order
               </a>
             ) : (
-              <p className="mt-6 text-center text-sm text-black/55">
+              <p className="mt-6 text-center text-sm text-slate-500">
                 Contact the business to place an order.
               </p>
             )}

@@ -1,268 +1,322 @@
 import {
+  ArrowRight,
   BarChart3,
   BellRing,
   Boxes,
-  CheckIcon,
+  Check,
   ReceiptText,
+  Share2,
+  ShieldCheck,
   Sparkles,
+  TrendingUp,
+  Wallet,
 } from "lucide-react";
 import StoreBadges from "./components/StoreBadges";
 
-const featureSections = [
-  {
-    eyebrow: "Inventory",
-    title: "Live stock view",
-    description: "Track your business inventory in real-time.",
-    image: "/images/live-stock.png",
-    points: [
-      {
-        title: "Real-time updates",
-        description:
-          "Always know what's available and what needs to be restocked.",
-      },
-      {
-        title: "Smart alerts",
-        description:
-          "Get notified when stock is low or out, so you never miss a reorder.",
-      },
-      {
-        title: "Easy management",
-        description: "Easily manage batches and categories of products.",
-      },
-    ],
-  },
-  {
-    eyebrow: "Orders",
-    title: "Capture orders with ease",
-    description: "Log customer orders quickly and efficiently.",
-    image: "/images/orders.png",
-    reverse: true,
-    points: [
-      {
-        title: "Quick entry",
-        description: "Add items to orders in seconds.",
-      },
-      {
-        title: "Multiple items",
-        description: "Handle orders with multiple items seamlessly.",
-      },
-      {
-        title: "Invoice generation",
-        description: "Easily view and send invoices with ease.",
-      },
-    ],
-  },
-  {
-    eyebrow: "Finance",
-    title: "Track revenue and expenses",
-    description: "Monitor your cash flow in one place.",
-    image: "/images/reports.png",
-    points: [
-      {
-        title: "Revenue insights",
-        description: "Keep track of your sales and revenue growth.",
-      },
-      {
-        title: "Expense tracking",
-        description: "Monitor and categorize outgoing costs.",
-      },
-      {
-        title: "Analyze profits",
-        description: "Easily view profits and losses over time.",
-      },
-    ],
-  },
-];
+const BRAND_GRADIENT = "bg-gradient-to-br from-[#16399c] via-[#1b73c0] to-[#36ab3b]";
 
-const highlights = [
+const features = [
   {
     icon: Boxes,
     title: "Inventory",
-    description: "Batches, categories and stock at a glance.",
+    description:
+      "Track batches, categories and live stock levels at a glance.",
   },
   {
     icon: ReceiptText,
-    title: "Orders",
-    description: "Capture sales and generate invoices.",
+    title: "Orders & invoices",
+    description: "Capture customer orders in seconds and share invoices.",
   },
   {
     icon: BarChart3,
     title: "Reports",
-    description: "Revenue, expenses and profit insights.",
+    description: "See revenue, expenses and profit trends in real time.",
+  },
+  {
+    icon: Wallet,
+    title: "Expenses",
+    description: "Log and categorise costs so cash flow stays clear.",
+  },
+  {
+    icon: Share2,
+    title: "Shareable catalogue",
+    description: "A public link customers can browse and order from.",
   },
   {
     icon: BellRing,
-    title: "Alerts",
-    description: "Low-stock reminders so you never run out.",
+    title: "Low-stock alerts",
+    description: "Smart reminders so you never miss a reorder.",
   },
+];
+
+const showcase = [
+  {
+    eyebrow: "Inventory",
+    title: "Your whole shop, always in sync",
+    description:
+      "Know exactly what's in stock, what's running low, and what needs restocking — updated the moment you make a sale.",
+    image: "/images/live-stock.png",
+    points: ["Real-time stock levels", "Batch & category management", "Low-stock alerts"],
+  },
+  {
+    eyebrow: "Orders",
+    title: "Capture every sale in seconds",
+    description:
+      "Add multiple items, generate clean invoices, and keep a tidy record of every order — right from your phone.",
+    image: "/images/orders.png",
+    reverse: true,
+    points: ["Quick multi-item entry", "Instant invoices", "Full order history"],
+  },
+  {
+    eyebrow: "Finance",
+    title: "Revenue and expenses, crystal clear",
+    description:
+      "Watch your cash flow in one calm dashboard. Track income, categorise expenses, and see profit at a glance.",
+    image: "/images/reports.png",
+    points: ["Revenue insights", "Expense tracking", "Profit & loss over time"],
+  },
+];
+
+const stats = [
+  { icon: TrendingUp, label: "Real-time", sub: "inventory sync" },
+  { icon: ShieldCheck, label: "Private", sub: "your data, secured" },
+  { icon: Sparkles, label: "Free", sub: "to download" },
 ];
 
 export default function Home() {
   return (
-    <div className="min-h-screen px-4 py-6 sm:px-10 sm:py-10">
-      <div className="mx-auto w-full max-w-6xl space-y-6 sm:space-y-8">
-        {/* Nav */}
-        <header className="flex w-full items-center justify-between rounded-full border border-black/10 bg-white/80 px-6 py-4 backdrop-blur">
-          <div className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.35em] text-[color:var(--ink)]">
-            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[color:var(--ink)] text-[10px] font-bold tracking-normal text-white">
-              RO
+    <div className="relative min-h-screen overflow-hidden bg-white text-slate-900">
+      {/* Ambient background */}
+      <div className="pointer-events-none absolute inset-0 -z-10">
+        <div className="absolute -left-40 -top-40 h-[32rem] w-[32rem] rounded-full bg-blue-500/15 blur-3xl" />
+        <div className="absolute -right-40 top-20 h-[32rem] w-[32rem] rounded-full bg-green-500/15 blur-3xl" />
+      </div>
+
+      {/* Nav */}
+      <header className="sticky top-0 z-30 border-b border-slate-200/70 bg-white/80 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3.5 sm:px-8">
+          <div className="flex items-center gap-2.5">
+            <img
+              src="/images/logo.png"
+              alt="Retail Omega"
+              className="h-9 w-9 rounded-xl shadow-sm ring-1 ring-black/5"
+            />
+            <span className="text-base font-extrabold tracking-tight text-slate-900">
+              Retail Omega
             </span>
-            Retail Omega
           </div>
           <a
             href="#download"
-            className="hidden rounded-full bg-[color:var(--ink)] px-5 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white transition hover:opacity-90 sm:inline-flex"
+            className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold text-white shadow-md transition hover:opacity-90 ${BRAND_GRADIENT}`}
           >
             Download
+            <ArrowRight className="h-4 w-4" />
           </a>
-        </header>
+        </div>
+      </header>
 
-        {/* Hero */}
-        <section className="relative overflow-hidden rounded-[36px] border border-black/10 bg-white/90">
-          <div className="grid gap-6 lg:grid-cols-[0.58fr_0.42fr]">
-            <div className="relative z-10 p-8 sm:p-10 lg:pr-0">
-              <span className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-[color:var(--cream)] px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.25em] text-[color:var(--copper)]">
-                <Sparkles className="h-3.5 w-3.5" />
-                Now on mobile
-              </span>
-              <h1 className="mt-5 font-serif text-4xl leading-[1.05] text-[color:var(--ink)] sm:text-5xl lg:text-6xl">
-                Your shop's inventory, in your pocket.
-              </h1>
-              <p className="mt-5 max-w-md text-base text-black/60 sm:text-lg">
-                Track stock, capture orders, and watch revenue grow — all from a
-                calm, beautifully simple app built for small businesses.
-              </p>
+      {/* Hero */}
+      <section className="mx-auto grid max-w-6xl items-center gap-12 px-5 pb-10 pt-12 sm:px-8 sm:pt-20 lg:grid-cols-2">
+        <div>
+          <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-1.5 text-xs font-semibold text-slate-600 shadow-sm">
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-500 opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500" />
+            </span>
+            Now on iOS &amp; Android
+          </span>
 
-              <div className="mt-8">
-                <StoreBadges />
-                <p className="mt-3 text-xs font-medium uppercase tracking-[0.2em] text-black/40">
-                  Free to download · Available on iOS & Android
-                </p>
+          <h1 className="mt-6 text-4xl font-extrabold leading-[1.05] tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
+            Your shop's inventory,{" "}
+            <span className="bg-gradient-to-r from-blue-700 to-green-500 bg-clip-text text-transparent">
+              in your pocket.
+            </span>
+          </h1>
+
+          <p className="mt-5 max-w-lg text-lg leading-relaxed text-slate-600">
+            Retail Omega helps small businesses track stock, capture orders, and
+            grow revenue — all from one calm, beautifully simple app.
+          </p>
+
+          <div className="mt-8">
+            <StoreBadges />
+            <p className="mt-3 text-sm font-medium text-slate-400">
+              Free to download · No card required
+            </p>
+          </div>
+
+          <div className="mt-10 grid max-w-md grid-cols-3 gap-4">
+            {stats.map((s) => (
+              <div key={s.label}>
+                <s.icon className="h-5 w-5 text-green-600" />
+                <p className="mt-2 text-sm font-bold text-slate-900">{s.label}</p>
+                <p className="text-xs text-slate-500">{s.sub}</p>
               </div>
+            ))}
+          </div>
+        </div>
 
-              <div className="mt-8 flex flex-wrap gap-2">
-                {highlights.map((item) => (
-                  <span
-                    key={item.title}
-                    className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-3 py-1.5 text-xs font-semibold text-black/60"
-                  >
-                    <item.icon className="h-3.5 w-3.5 text-[color:var(--sage)]" />
-                    {item.title}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            <div className="relative min-h-[320px] lg:min-h-[460px]">
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[color:var(--clay)]/40 to-transparent" />
+        {/* Hero visual */}
+        <div className="relative mx-auto w-full max-w-md lg:max-w-none">
+          <div
+            className={`relative aspect-square overflow-hidden rounded-[2.5rem] p-8 shadow-2xl ${BRAND_GRADIENT}`}
+          >
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.25),transparent_55%)]" />
+            <div className="flex h-full items-center justify-center">
               <img
-                src="/images/hero.png"
-                alt="Retail Omega app"
-                className="h-full w-full object-cover"
+                src="/images/logo.png"
+                alt="Retail Omega app icon"
+                className="w-3/5 drop-shadow-2xl"
               />
             </div>
           </div>
-        </section>
 
-        {/* Highlights strip */}
-        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {highlights.map((item) => (
-            <div
-              key={item.title}
-              className="rounded-[24px] border border-black/10 bg-white/90 p-6 transition hover:-translate-y-1 hover:shadow-[var(--shadow)]"
-            >
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[color:var(--cream)] text-[color:var(--copper)]">
-                <item.icon className="h-5 w-5" />
+          {/* Floating cards */}
+          <div className="absolute -left-4 top-10 hidden rounded-2xl bg-white/95 p-4 shadow-xl ring-1 ring-black/5 backdrop-blur sm:block">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-100 text-green-600">
+                <TrendingUp className="h-5 w-5" />
               </div>
-              <p className="mt-4 font-semibold text-[color:var(--ink)]">
-                {item.title}
+              <div>
+                <p className="text-xs text-slate-500">Revenue today</p>
+                <p className="text-lg font-extrabold text-slate-900">₹24,860</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="absolute -right-4 bottom-10 hidden rounded-2xl bg-white/95 p-4 shadow-xl ring-1 ring-black/5 backdrop-blur sm:block">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 text-blue-600">
+                <BellRing className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-xs text-slate-500">Low stock</p>
+                <p className="text-lg font-extrabold text-slate-900">3 items</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Features */}
+      <section className="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24">
+        <div className="mx-auto max-w-2xl text-center">
+          <p className="text-sm font-bold uppercase tracking-[0.2em] text-green-600">
+            Everything you need
+          </p>
+          <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
+            One app to run the whole shop
+          </h2>
+          <p className="mt-4 text-lg text-slate-600">
+            From the first batch of stock to your monthly profit report — Retail
+            Omega keeps it all in one place.
+          </p>
+        </div>
+
+        <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {features.map((f) => (
+            <div
+              key={f.title}
+              className="group rounded-3xl border border-slate-200 bg-white p-7 shadow-sm transition hover:-translate-y-1 hover:border-transparent hover:shadow-xl"
+            >
+              <div
+                className={`flex h-12 w-12 items-center justify-center rounded-2xl text-white shadow-md ${BRAND_GRADIENT}`}
+              >
+                <f.icon className="h-6 w-6" />
+              </div>
+              <h3 className="mt-5 text-lg font-bold text-slate-900">{f.title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-slate-600">
+                {f.description}
               </p>
-              <p className="mt-1 text-sm text-black/55">{item.description}</p>
             </div>
           ))}
-        </section>
+        </div>
+      </section>
 
-        {/* Feature sections */}
-        {featureSections.map((section) => (
-          <section
-            key={section.title}
-            className="grid gap-8 rounded-[32px] border border-black/10 bg-white/90 p-8 lg:grid-cols-2 lg:items-center"
+      {/* Showcase */}
+      <section className="mx-auto max-w-6xl space-y-20 px-5 pb-20 sm:px-8 sm:pb-28">
+        {showcase.map((s) => (
+          <div
+            key={s.title}
+            className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16"
           >
-            <div className={section.reverse ? "lg:order-2" : ""}>
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[color:var(--sage)]">
-                {section.eyebrow}
+            <div className={s.reverse ? "lg:order-2" : ""}>
+              <p className="text-sm font-bold uppercase tracking-[0.2em] text-green-600">
+                {s.eyebrow}
               </p>
-              <h2 className="mt-3 font-serif text-3xl text-[color:var(--ink)] sm:text-4xl">
-                {section.title}
+              <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
+                {s.title}
               </h2>
-              <p className="mt-2 text-sm text-black/60">
-                {section.description}
+              <p className="mt-4 text-lg leading-relaxed text-slate-600">
+                {s.description}
               </p>
-              <div className="mt-6 space-y-4 text-sm text-black/65">
-                {section.points.map((item) => (
-                  <div key={item.title} className="flex gap-4">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[color:var(--cream)] text-[color:var(--copper)]">
-                      <CheckIcon className="h-4 w-4" />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-[color:var(--ink)]">
-                        {item.title}
-                      </p>
-                      <p className="mt-1 text-black/60">{item.description}</p>
-                    </div>
-                  </div>
+              <ul className="mt-6 space-y-3">
+                {s.points.map((p) => (
+                  <li key={p} className="flex items-center gap-3 text-slate-700">
+                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-green-100 text-green-600">
+                      <Check className="h-4 w-4" />
+                    </span>
+                    <span className="font-medium">{p}</span>
+                  </li>
                 ))}
+              </ul>
+            </div>
+            <div className={s.reverse ? "lg:order-1" : ""}>
+              <div className="relative">
+                <div
+                  className={`absolute -inset-4 -z-10 rounded-[2.5rem] opacity-20 blur-2xl ${BRAND_GRADIENT}`}
+                />
+                <img
+                  src={s.image}
+                  alt={s.title}
+                  className="w-full rounded-3xl border border-slate-200 bg-white object-cover shadow-xl"
+                />
               </div>
             </div>
-            <div
-              className={`flex items-center justify-center ${
-                section.reverse ? "lg:order-1" : ""
-              }`}
-            >
-              <img
-                src={section.image}
-                alt={`${section.title} preview`}
-                className="w-full max-w-lg rounded-[28px] border border-black/10 bg-white object-cover shadow-sm"
-              />
-            </div>
-          </section>
+          </div>
         ))}
+      </section>
 
-        {/* Download CTA */}
-        <section
-          id="download"
-          className="relative overflow-hidden rounded-[36px] border border-black/10 bg-[color:var(--ink)] p-10 text-center sm:p-14"
+      {/* Download CTA */}
+      <section id="download" className="mx-auto max-w-6xl px-5 pb-20 sm:px-8">
+        <div
+          className={`relative overflow-hidden rounded-[2.5rem] px-6 py-16 text-center shadow-2xl sm:px-16 sm:py-20 ${BRAND_GRADIENT}`}
         >
-          <div className="pointer-events-none absolute -left-16 -top-16 h-56 w-56 rounded-full bg-[color:var(--copper)]/30 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-16 -right-16 h-56 w-56 rounded-full bg-[color:var(--sage)]/30 blur-3xl" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.2),transparent_50%)]" />
           <div className="relative">
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-white/60">
-              Get the app
-            </p>
-            <h2 className="mx-auto mt-4 max-w-2xl font-serif text-3xl text-white sm:text-5xl">
-              Run your business from anywhere.
+            <img
+              src="/images/logo.png"
+              alt="Retail Omega"
+              className="mx-auto h-20 w-20 rounded-2xl shadow-lg ring-1 ring-white/20"
+            />
+            <h2 className="mx-auto mt-6 max-w-2xl text-3xl font-extrabold tracking-tight text-white sm:text-5xl">
+              Run your business from anywhere
             </h2>
-            <p className="mx-auto mt-4 max-w-md text-sm text-white/70 sm:text-base">
-              Download Retail Omega and bring calm, organized inventory
-              management to your pocket today.
+            <p className="mx-auto mt-4 max-w-md text-base text-white/80 sm:text-lg">
+              Download Retail Omega today and bring calm, organised inventory
+              management to your pocket.
             </p>
             <div className="mt-8 flex justify-center">
-              <StoreBadges align="center" />
+              <StoreBadges align="center" variant="light" />
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Footer */}
-        <footer className="flex flex-col items-center justify-between gap-4 rounded-[24px] border border-black/10 bg-white/80 px-6 py-5 text-sm text-black/55 sm:flex-row">
-          <div className="flex items-center gap-2 font-semibold uppercase tracking-[0.3em] text-[color:var(--ink)]">
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[color:var(--ink)] text-[9px] font-bold tracking-normal text-white">
-              RO
-            </span>
-            Retail Omega
+      {/* Footer */}
+      <footer className="border-t border-slate-200">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-5 py-8 text-sm text-slate-500 sm:flex-row sm:px-8">
+          <div className="flex items-center gap-2.5">
+            <img
+              src="/images/logo.png"
+              alt="Retail Omega"
+              className="h-7 w-7 rounded-lg ring-1 ring-black/5"
+            />
+            <span className="font-bold text-slate-800">Retail Omega</span>
           </div>
           <p>© {new Date().getFullYear()} Retail Omega. All rights reserved.</p>
-        </footer>
-      </div>
+        </div>
+      </footer>
     </div>
   );
 }
