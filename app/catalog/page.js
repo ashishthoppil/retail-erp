@@ -1,6 +1,11 @@
 import { Suspense } from "react";
 import CatalogSearchParamsClient from "./CatalogSearchParamsClient";
 
+export const metadata = {
+  title: "Catalogue",
+  description: "Browse products and place an order.",
+};
+
 export default function CatalogPage() {
   return (
     <Suspense

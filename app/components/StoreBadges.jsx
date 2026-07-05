@@ -1,8 +1,9 @@
-// Visual "download" badges for the App Store and Google Play. The app isn't
-// published yet, so the links point to "#" placeholders — swap in the real
-// store URLs once the listings are live.
-const APP_STORE_URL = "#";
-const PLAY_STORE_URL = "#";
+// Store badges with the availability framing:
+//  - Google Play: live CTA. PLACEHOLDER URL — the listing is still in review;
+//    swap PLAY_STORE_URL for the real listing link the moment it's approved.
+//  - App Store: deliberate non-interactive "coming soon" state. Do not turn
+//    this into a link until the iOS app actually ships.
+const PLAY_STORE_URL = "#"; // PLACEHOLDER: real Google Play listing URL
 
 function AppleLogo({ className }) {
   return (
@@ -44,35 +45,31 @@ export default function StoreBadges({
   variant = "dark",
 }) {
   const justify = align === "center" ? "justify-center" : "justify-start";
-  const base =
+  const playBase =
     variant === "light"
       ? "bg-white text-slate-900 ring-1 ring-black/5"
       : "bg-slate-900 text-white";
-  const sub = variant === "light" ? "text-slate-500" : "text-white/70";
-  return (
-    <div className={`flex flex-wrap items-center gap-3 ${justify} ${className}`}>
-      <a
-        href={APP_STORE_URL}
-        className={`group inline-flex items-center gap-3 rounded-2xl px-5 py-3 shadow-md transition hover:-translate-y-0.5 hover:shadow-xl ${base}`}
-      >
-        <AppleLogo className="h-7 w-7" />
-        <span className="flex flex-col leading-none">
-          <span className={`text-[10px] font-medium uppercase tracking-wide ${sub}`}>
-            Download on the
-          </span>
-          <span className="mt-0.5 text-lg font-semibold tracking-tight">
-            App Store
-          </span>
-        </span>
-      </a>
+  const playSub = variant === "light" ? "text-slate-500" : "text-white/70";
+  const appleBase =
+    variant === "light"
+      ? "bg-white/40 text-slate-500 ring-1 ring-white/40"
+      : "bg-slate-100 text-slate-400 ring-1 ring-slate-200";
+  const appleSub = variant === "light" ? "text-slate-500/80" : "text-slate-400";
 
+  return (
+    <div
+      className={`flex flex-wrap items-center gap-3 ${justify} ${className}`}
+    >
       <a
         href={PLAY_STORE_URL}
-        className={`group inline-flex items-center gap-3 rounded-2xl px-5 py-3 shadow-md transition hover:-translate-y-0.5 hover:shadow-xl ${base}`}
+        aria-label="Get Retail Omega on Google Play"
+        className={`inline-flex items-center gap-3 rounded-2xl px-5 py-3 shadow-md transition hover:-translate-y-0.5 hover:shadow-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-blue ${playBase}`}
       >
         <PlayLogo className="h-6 w-6" />
         <span className="flex flex-col leading-none">
-          <span className={`text-[10px] font-medium uppercase tracking-wide ${sub}`}>
+          <span
+            className={`text-[10px] font-medium uppercase tracking-wide ${playSub}`}
+          >
             Get it on
           </span>
           <span className="mt-0.5 text-lg font-semibold tracking-tight">
@@ -80,6 +77,24 @@ export default function StoreBadges({
           </span>
         </span>
       </a>
+
+      <span
+        aria-disabled="true"
+        title="Coming soon to the App Store"
+        className={`inline-flex cursor-default select-none items-center gap-3 rounded-2xl px-5 py-3 ${appleBase}`}
+      >
+        <AppleLogo className="h-7 w-7 opacity-60" />
+        <span className="flex flex-col leading-none">
+          <span
+            className={`text-[10px] font-medium uppercase tracking-wide ${appleSub}`}
+          >
+            Coming soon to the
+          </span>
+          <span className="mt-0.5 text-lg font-semibold tracking-tight opacity-70">
+            App Store
+          </span>
+        </span>
+      </span>
     </div>
   );
 }
